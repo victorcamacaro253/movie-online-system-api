@@ -128,6 +128,7 @@ static async deleteTheater(req,res){
 }
 
 
+
 }
 
 
