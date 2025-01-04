@@ -7,9 +7,10 @@ router.get('/',Auditorium.getAllAuditoriums)
 
 router.get('/theater/:theaterId',Auditorium.getAuditoriumsByTheater)
 
-/*
+
 router.get('/:id',Auditorium.getAuditoriumById)
 
+/*
 
 router.post('/',Auditorium.createAuditorium)
 
