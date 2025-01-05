@@ -77,12 +77,16 @@ class Actors{
 
                     static async addMultipleActors(req, res) {
                         const { actors } = req.body;
+                        const files = req.files
+                        
                       
                         try {
                           // Validate the input
                           if (!Array.isArray(actors) || actors.length === 0) {
                             return res.status(400).json({ message: "Actors array is required" });
                           }
+
+
                       
                           // Prepare actor names and ensure they're trimmed
                           const actorNames = actors.map(actor => actor.name.trim());
@@ -98,6 +102,10 @@ class Actors{
                           const newActors = actors.filter(
                             actor => !existingNames.includes(actor.name.trim().toLowerCase())
                           );
+
+                          newActors.forEach((actor,index)=>{
+                            actor.image=`/uploads/actors/${files[index].filename}`;
+                          })
                       
                           // Validate new actors
                           for (const actor of newActors) {

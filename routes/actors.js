@@ -12,7 +12,7 @@ router.get('/:id',Actors.getActorById)
 
 router.post('/',uploadActor.single('image'),Actors.createActor)
 
-router.post('/addMultiple',Actors.addMultipleActors)
+router.post('/addMultiple',uploadActor.array('image'),Actors.addMultipleActors)
 
 router.put('/:id',Actors.updateActor)
 

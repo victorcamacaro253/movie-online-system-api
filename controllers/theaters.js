@@ -47,6 +47,24 @@ class Theater {
                 
     }
 
+    static async getTheatersByCity(req,res){
+        const {city} = req.params
+        console.log(city)
+        try{
+            const theaters = await TheaterModel.find({"location.city":{$regex:city,$options:"i"}});
+
+            if(!theaters){
+                return res.status(404).json({message: "Theaters not found"})
+            }
+
+            res.json(theaters);
+            }catch(error){
+                console.log(error);
+                res.status(500).json({message: "Error fetching theaters by city"})
+                }
+                
+    }
+
 
    
 static async createTheater(req, res) {

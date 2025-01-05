@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Multiple Actors</title>
+</head>
+<body>
+    <h1>Add Multiple Actors</h1>
+    <form id="actorForm" enctype="multipart/form-data">
+        <div id="actorFields">
+            <div class="actor">
+                <input type="text" name="actors[0][name]" placeholder="Actor Name" required>
+                <input type="file" name="image[]" accept="image/*" multiple required>
+            </div>
+        </div>
+        <button type="button" id="addActor">Add Another Actor</button>
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="response"></div>
+
+    <script>
+        document.getElementById('addActor').addEventListener('click', function() {
+            const actorFields = document.getElementById('actorFields');
+            const actorCount = actorFields.children.length;
+            const newActorDiv = document.createElement('div');
+            newActorDiv.classList.add('actor');
+            newActorDiv.innerHTML = `
+                <input type="text" name="actors[${actorCount}][name]" placeholder="Actor Name" required>
+                <input type="file" name="image[]" accept="image/*" required>
+            `;
+            actorFields.appendChild(newActorDiv);
+        });
+
+        document.getElementById('actorForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const responseDiv = document.getElementById('response');
+console.log(formData)
+            try {
+                const response = await fetch('http://localhost:5000/actors/addMultiple', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                responseDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                console.log(error)
+                responseDiv.innerHTML = `<pre>Error: ${error.message}</pre>`;
+            }
+        });
+    </script>
+</body>
+</html>

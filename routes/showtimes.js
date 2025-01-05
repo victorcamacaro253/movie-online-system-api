@@ -4,8 +4,12 @@ const router = Router();
 
 router.get("/", ShowtimeController.getAllShowtimes);
 
+router.get('/theater/:theater_id/date/:date', ShowtimeController.getShowtimesByTheaterAndDate);
+
+router.get("/:id", ShowtimeController.getShowtimeById);
+
+
 /*
-router.get("/:id", Showtime.getShowtimeById);
 
 router.post("/", Showtime.createShowtime);
 

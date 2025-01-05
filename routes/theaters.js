@@ -9,6 +9,8 @@ router.get('/:id',Theater.getTheaterById)
 
 router.get('/name/:name',Theater.getTheaterByName)
 
+router.get('/city/:city',Theater.getTheatersByCity)
+
 router.post('/',Theater.createTheater)
 
 router.put('/:id',Theater.updateTheater)
