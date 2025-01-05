@@ -8,10 +8,11 @@ router.get('/theater/:theater_id/date/:date', ShowtimeController.getShowtimesByT
 
 router.get("/:id", ShowtimeController.getShowtimeById);
 
+router.post("/", ShowtimeController.createShowtime);
+
 
 /*
 
-router.post("/", Showtime.createShowtime);
 
 router.put("/:id", Showtime.updateShowtime);
 

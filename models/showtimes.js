@@ -7,12 +7,12 @@ const seatSchema = new Schema({
 })
 
 const showtimeSchema = new Schema({
-    movie_id: [
+    movie_id: 
         {type: Schema.Types.ObjectId, 
          ref: "movies", 
-         required: true}],
+         required: true},
 
-    theater_id: [{type: Schema.Types.ObjectId, ref: "theaters", required: true}],
+    theater_id: {type: Schema.Types.ObjectId, ref: "theaters", required: true},
     auditorium_id: {type: Schema.Types.ObjectId, ref: "auditoriums", required: true},
     start_time: {type: Date, required: true},
     end_time: {type: Date, required: true},

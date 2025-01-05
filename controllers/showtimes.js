@@ -336,12 +336,14 @@ class ShowtimeController {
                 // Parse start_time and end_time to ensure they're Date objects
                 const startDate = new Date(start_time);
                 const endDate = new Date(end_time);
+
+                console.log(startDate,endDate,date)
         
                 // Check for overlapping showtimes in the same theater and auditorium
                 const existingShowtime = await Showtime.find({
                     theater_id: theater_id,
                     auditorium_id: auditorium_id,
-                    date: date,
+                  //  date: date,
                     $or: [
                         {
                             start_time: { $lt: endDate }, // Check if the new start time is before an existing end time
@@ -350,6 +352,7 @@ class ShowtimeController {
                     ]
                 });
         
+                console.log(existingShowtime)
                 // If there are overlapping showtimes, return an error
                 if (existingShowtime.length > 0) {
                     return res.status(400).json({ msg: 'There is an overlapping showtime for this theater and auditorium.' });
