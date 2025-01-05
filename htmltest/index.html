@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agregar Película</title>
+</head>
+<body>
+  <h1>Agregar Película</h1>
+  <form id="movieForm" enctype="multipart/form-data">
+    <label for="title">Título:</label>
+    <input type="text" id="title" name="title" required><br><br>
+
+    <label for="description">Descripción:</label>
+    <textarea id="description" name="description" required></textarea><br><br>
+
+    <label for="genre">Género (separado por comas):</label>
+    <input type="text" id="genre" name="genre" required><br><br>
+
+    <label for="director">Director:</label>
+    <input type="text" id="director" name="director" required><br><br>
+
+    <label for="producers">Productores (separado por comas):</label>
+    <input type="text" id="producers" name="producers" required><br><br>
+
+    <div id="castContainer">
+      <label for="cast1">Actor 1:</label>
+      <select id="cast1" name="cast" required>
+        <!-- Options will be populated here -->
+      </select><br><br>
+    </div>
+
+    <button type="button" id="addActorButton">Agregar Otro Actor</button><br><br>
+
+    <label for="runtime">Duración (en minutos):</label>
+    <input type="number" id="runtime" name="runtime" required><br><br>
+
+    <label for="language">Idioma:</label>
+    <input type="text" id="language" name="language" required><br><br>
+
+    <label for="rating">Calificación:</label>
+    <input type="number" step="0.1" id="rating" name="rating" required><br><br>
+
+    <label for="ageRating">Clasificación por Edad:</label>
+    <input type="text" id="ageRating" name="ageRating" required><br><br>
+
+    <label for="release_date">Fecha de Estreno:</label>
+    <input type="date" id="release_date" name="release_date" required><br><br>
+
+    <label for="country">País:</label>
+    <input type="text" id="country" name="country" required><br><br>
+
+    <label for="status">Estado:</label>
+    <select id="status" name="status" required>
+      <option value="playing">Playing</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="completed">Completed</option>
+    </select><br><br>
+
+    <label for="poster">Poster:</label>
+    <input type="file" id="poster" name="poster" accept="image/*" required><br><br>
+
+    <button type="submit">Agregar Película</button>
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+      try {
+        const response = await fetch("http://localhost:5000/actors"); // Adjust the URL to your API endpoint
+        const actors = await response.json();
+
+        // Function to populate select options
+        const populateSelectOptions = (selectElement) => {
+          actors.forEach(actor => {
+            const option = document.createElement("option");
+            option.value = actor._id; // Assuming each actor has a unique _id
+            option.textContent = actor.name; // Assuming each actor has a name field
+            selectElement.appendChild(option);
+          });
+        };
+
+        // Populate the first actor select
+        const firstCastSelect = document.getElementById("cast1");
+        populateSelectOptions(firstCastSelect);
+
+        // Add event listener for the "Add Actor" button
+        document.getElementById("addActorButton").addEventListener("click", function () {
+          const newSelect = document.createElement("select");
+          newSelect.name = "cast"; // Use the same name for all cast selects
+          newSelect.required = true; // Make it required
+
+          // Populate the new select with actor options
+          populateSelectOptions(newSelect);
+
+          // Create a label for the new select
+          const newLabel = document.createElement("label");
+          newLabel.textContent = `Actor ${document.querySelectorAll('#castContainer select').length + 1}:`;
+          newLabel.appendChild(newSelect);
+
+          // Append the new label and select to the cast container
+          const castContainer = document.getElementById("castContainer");
+          castContainer.appendChild(newLabel);
+          castContainer.appendChild(document.createElement("br")); // Add a line break for spacing
+        });
+      } catch (error) {
+        console.error("Error fetching actors:", error);
+      }
+    });
+
+    document.getElementById("movieForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      // Create a FormData object
+      const formData = new FormData();
+      formData.append("title", document.getElementById("title").value);
+      formData.append("description", document.getElementById("description").value);
+      formData.append("genre", document.getElementById("genre").value.split(","));
+      formData.append("director", document.getElementById("director").value);
+      formData.append("producers", document.getElementById("producers").value.split(","));
+
+      // Get selected cast IDs from all select elements
+      const selectedCast = Array.from(document.querySelectorAll('select[name="cast"]')).map(select => select.value);
+      selectedCast.forEach(id => formData.append("cast", id)); // Append each selected ID individually
+
+      formData.append("runtime", document.getElementById("runtime").value);
+      formData.append("language", document.getElementById("language").value);
+      formData.append("rating", document.getElementById("rating").value);
+      formData.append("ageRating", document.getElementById("ageRating").value);
+      formData.append("release_date", document.getElementById("release_date").value);
+      formData.append("country", document.getElementById("country").value);
+      formData.append("status", document.getElementById("status").value);
+      formData.append("poster", document.getElementById("poster").files[0]);
+
+      try {
+        const response = await fetch("http://localhost:5000/movies", {
+          method: "POST",
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          document.getElementById("response").innerText = "Película agregada exitosamente!";
+        } else {
+          document.getElementById("response").innerText = `Error: ${result.error}`;
+        }
+      } catch (error) {
+        console.log(error);
+        document.getElementById("response").innerText = `Error: ${error.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

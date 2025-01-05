@@ -52,8 +52,21 @@ class Actors{
         }
 
         static async createActor(req,res){
-            const {name,image} = req.body;
+            const {name} = req.body;
+            console.log(req.file)
+
+            
+
+            const image = req.file ? `/uploads/actors/${req.file.originalname}` : null;
+            console.log(image)
             try {
+
+              const existingActor = await Actor.findOne({name})
+            console.log(existingActor)
+
+            if(existingActor){
+              return res.status(400).json({message: "Actor already exists"})
+            }
                 const actor = await Actor.create({name,image});
                 res.json(actor);
                 } catch (error) {

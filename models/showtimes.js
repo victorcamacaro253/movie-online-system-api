@@ -11,8 +11,9 @@ const showtimeSchema = new Schema({
         {type: Schema.Types.ObjectId, 
          ref: "movies", 
          required: true}],
+
     theater_id: [{type: Schema.Types.ObjectId, ref: "theaters", required: true}],
- auditorium_id: {type: Schema.Types.ObjectId, ref: "Auditorium", required: true},
+    auditorium_id: {type: Schema.Types.ObjectId, ref: "auditoriums", required: true},
     start_time: {type: Date, required: true},
     end_time: {type: Date, required: true},
     total_seats: {type: Number, required: true},

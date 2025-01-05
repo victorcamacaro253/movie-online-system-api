@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agregar Múltiples Películas</title>
+</head>
+<body>
+  <h1>Agregar Múltiples Películas</h1>
+  <form id="moviesForm" enctype="multipart/form-data">
+    <div id="moviesContainer">
+      <div class="movieEntry">
+        <h3>Película 1</h3>
+        <label for="title">Título:</label>
+        <input type="text" name="title" required><br><br>
+
+        <label for="description">Descripción:</label>
+        <textarea name="description" required></textarea><br><br>
+
+        <label for="genre">Género (separado por comas):</label>
+        <input type="text" name="genre" required><br><br>
+
+        <label for="director">Director:</label>
+        <input type="text" name="director" required><br><br>
+
+        <label for="producers">Productores (separado por comas):</label>
+        <input type="text" name="producers" required><br><br>
+
+        <div class="castContainer">
+            <label for="cast1">Cast:</label>
+            <select name="cast" required>
+              <!-- Options will be populated here -->
+            </select><br><br>
+          </div>
+          <button type="button" class="addActorButton">Agregar Otro Actor</button><br><br>
+  
+  
+
+        <label for="runtime">Duración (en minutos):</label>
+        <input type="number" name="runtime" required><br><br>
+
+        <label for="language">Idioma:</label>
+        <input type="text" name="language" required><br><br>
+
+        <label for="rating">Calificación:</label>
+        <input type="number" step="0.1" name="rating" required><br><br>
+
+        <label for="ageRating">Clasificación por Edad:</label>
+        <input type="text" name="ageRating" required><br><br>
+
+        <label for="release_date">Fecha de Estreno:</label>
+        <input type="date" name="release_date" required><br><br>
+
+        <label for="country">País:</label>
+        <input type="text" name="country" required><br><br>
+
+        <label for="status">Estado:</label>
+        <select name="status" required>
+          <option value="playing">Playing</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+        </select><br><br>
+
+        <label for="poster">Poster:</label>
+        <input type="file" name="poster" accept="image/*" required><br><br>
+      </div>
+    </div>
+
+    <button type="button" id="addMovieButton">Agregar Otra Película</button><br><br>
+    <button type="submit">Agregar Películas</button>
+  </form>
+
+  <p id="response"></p>
+
+  <script>
+   document.addEventListener("DOMContentLoaded", async function () {
+  try {
+    const response = await fetch("http://localhost:5000/actors");
+    const actors = await response.json();
+
+    const populateSelectOptions = (selectElement) => {
+      actors.forEach(actor => {
+        const option = document.createElement("option");
+        option.value = actor._id;
+        option.textContent = actor.name;
+        selectElement.appendChild(option);
+      });
+    };
+
+    const firstCastSelect = document.querySelector('select[name="cast"]');
+    populateSelectOptions(firstCastSelect);
+
+    // Event delegation for adding another actor
+    document.getElementById("moviesContainer").addEventListener("click", function (event) {
+      if (event.target && event.target.classList.contains("addActorButton")) {
+        const movieEntry = event.target.closest(".movieEntry");  // Find the closest movie entry
+        const castContainer = movieEntry.querySelector(".castContainer");
+
+        const newSelect = document.createElement("select");
+        newSelect.name = "cast";
+        newSelect.required = true;
+
+        // Populate the new select with actor options
+        populateSelectOptions(newSelect);
+
+        // Create a label for the new select
+        const newLabel = document.createElement("label");
+        newLabel.textContent = "Cast:";
+        castContainer.appendChild(newLabel);
+        castContainer.appendChild(newSelect);
+        castContainer.appendChild(document.createElement("br"));
+      }
+    });
+
+    // Event listener for the "Add Movie" button
+    document.getElementById("addMovieButton").addEventListener("click", function () {
+      const newMovieEntry = document.createElement("div");
+      newMovieEntry.classList.add("movieEntry");
+      newMovieEntry.innerHTML = `
+        <h3>Película ${document.querySelectorAll('.movieEntry').length + 1}</h3>
+        <label for="title">Título:</label>
+        <input type="text" name="title" required><br><br>
+        <label for="description">Descripción:</label>
+        <textarea name="description" required></textarea><br><br>
+        <label for="genre">Género (separado por comas):</label>
+        <input type="text" name="genre" required><br><br>
+        <label for="director">Director:</label>
+        <input type="text" name="director" required><br><br>
+        <label for="producers">Productores (separado por comas):</label>
+        <input type="text" name="producers" required><br><br>
+
+        <div class="castContainer">
+          <label for="cast1">Cast:</label>
+          <select name="cast" required>
+            <!-- Options will be populated here -->
+          </select><br><br>
+        </div>
+        <button type="button" class="addActorButton">Agregar Otro Actor</button><br><br>
+
+        <label for="runtime">Duración (en minutos):</label>
+        <input type="number" name="runtime" required><br><br>
+        <label for="language">Idioma:</label>
+        <input type="text" name="language" required><br><br>
+        <label for="rating">Calificación:</label>
+        <input type="number" step="0.1" name="rating" required><br><br>
+        <label for="ageRating">Clasificación por Edad:</label>
+        <input type="text" name="ageRating" required><br><br>
+        <label for="release_date">Fecha de Estreno:</label>
+        <input type="date" name="release_date" required><br><br>
+        <label for="country">País:</label>
+        <input type="text" name="country" required><br><br>
+        <label for="status">Estado:</label>
+        <select name="status" required>
+          <option value="playing">Playing</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+        </select><br><br>
+        <label for="poster">Poster:</label>
+        <input type="file" name="poster" accept="image/*" required><br><br>
+      `;
+
+      // Populate the new select with actor options
+      const newSelect = newMovieEntry.querySelector('select[name="cast"]');
+      populateSelectOptions(newSelect);
+
+      // Append the new movie entry to the movies container
+      document.getElementById("moviesContainer").appendChild(newMovieEntry);
+    });
+  } catch (error) {
+    console.error("Error fetching actors:", error);
+  }
+});
+
+
+    document.getElementById("moviesForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  // Create a FormData object to handle multipart data
+  const formData = new FormData();
+  const movieEntries = document.querySelectorAll(".movieEntry");
+
+  // Loop through all movie entries and append data
+  movieEntries.forEach((entry, index) => {
+    formData.append(`movies[${index}][title]`, entry.querySelector('input[name="title"]').value);
+    formData.append(`movies[${index}][description]`, entry.querySelector('textarea[name="description"]').value);
+    formData.append(`movies[${index}][genre]`, entry.querySelector('input[name="genre"]').value);
+    formData.append(`movies[${index}][director]`, entry.querySelector('input[name="director"]').value);
+    formData.append(`movies[${index}][producers]`, entry.querySelector('input[name="producers"]').value);
+
+    const castSelects = entry.querySelectorAll('select[name="cast"]');
+    const castArray = Array.from(castSelects).map(select => select.value);
+    formData.append(`movies[${index}][cast]`, castArray.join(','));  // Join cast as a comma-separated string
+
+
+    formData.append(`movies[${index}][runtime]`, entry.querySelector('input[name="runtime"]').value);
+    formData.append(`movies[${index}][language]`, entry.querySelector('input[name="language"]').value);
+    formData.append(`movies[${index}][rating]`, entry.querySelector('input[name="rating"]').value);
+    formData.append(`movies[${index}][ageRating]`, entry.querySelector('input[name="ageRating"]').value);
+    formData.append(`movies[${index}][release_date]`, entry.querySelector('input[name="release_date"]').value);
+    formData.append(`movies[${index}][country]`, entry.querySelector('input[name="country"]').value);
+    formData.append(`movies[${index}][status]`, entry.querySelector('select[name="status"]').value);
+    formData.append(`movies[${index}][poster]`, entry.querySelector('input[name="poster"]').files);
+  });
+
+  // Send data to the server
+  try {
+    const response = await fetch("http://localhost:5000/movies/addMultipleMovies", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    if (response.ok) {
+      document.getElementById("response").innerText = "Películas agregadas exitosamente!";
+    } else {
+      document.getElementById("response").innerText = `Error: ${result.error}`;
+    }
+  } catch (error) {
+    console.log("Error submitting form:", error);
+    document.getElementById("response").innerText = "Hubo un error al enviar el formulario.";
+  }
+});
+
+  </script>
+</body>
+</html>

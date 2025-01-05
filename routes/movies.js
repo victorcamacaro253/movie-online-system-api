@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Movies from "../controllers/movies.js";
+import upload from "../middleware/multerConfig.js";
 
 const router = Router()
 
@@ -40,10 +41,10 @@ router.put('/:id',Movies.updateMovie)
 router.put('/status/:id',Movies.updateStatus)
 
 
-router.post('/',Movies.addMovie)
+router.post('/',upload.single('poster'),Movies.addMovie)
 
 
-router.post('/addMultipleMovies',Movies.addMultipleMovies)
+router.post('/addMultipleMovies',upload.array('poster'),Movies.addMultipleMovies)
 
 
 router.delete('/:id',Movies.deleteMovie)

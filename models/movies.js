@@ -41,6 +41,8 @@ const movieSchema = new Schema(
     rating: {
       type: Number,
       required: true,
+      min: 0,
+    max: 10,
     },
     ageRating: {
     type: String,
@@ -62,7 +64,7 @@ const movieSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ["playing", "upcoming", "completed"], // El estado puede ser uno de estos valores
+      enum: ["playing", "upcoming", "completed","Released"], // El estado puede ser uno de estos valores
       required: true,
     },
   },

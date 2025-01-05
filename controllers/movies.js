@@ -1,5 +1,6 @@
 import Movie from '../models/movies.js'
 import Actor from '../models/actors.js'
+import mongoose from 'mongoose';
 
 class Movies {
     
@@ -251,6 +252,7 @@ class Movies {
 
 
   static async addMovie(req, res) {
+    console.log(req.body)
     try {
       const {
         title,
@@ -265,7 +267,6 @@ class Movies {
         ageRating,
         release_date,
         trailer,
-        poster,
         country,
         status,
       } = req.body;
@@ -297,12 +298,18 @@ class Movies {
       if(existingMovie){
         return res.status(400).json({error: "Movie already exists"})
       }
+
+      const poster = req.file ? `/uploads/poster/${req.file.filename}` : null;
       // Validate arrays
      /* if (!Array.isArray(genre) || !Array.isArray(producers) || !Array.isArray(cast)) {
         return res.status(400).json({
           error: "Genre, producers, and cast must be arrays.",
         });
       }*/
+
+        // Convert cast IDs to an array of ObjectId if they are not already
+    const castIds = cast.map(id => new mongoose.Types.ObjectId(id));
+
   
       // Create a new movie document
       const newMovie = new Movie({
@@ -311,7 +318,8 @@ class Movies {
         genre,
         director,
         producers,
-        cast,
+        cast: castIds, // Use the converted cast IDs
+
         runtime,
         language,
         rating,
@@ -387,60 +395,145 @@ class Movies {
     }
   }
   */
-  static async addMultipleMovies(req, res) {
-    try {
-      const { movies } = req.body;
   
+  static async addMultipleMovies(req, res) {
+    console.log(req.body)
+    try {
+      const { movies } = req.body; // Array of movies sent in the request
+  
+      // Validate that movies is provided and is an array
       if (!movies || !Array.isArray(movies)) {
         return res.status(400).json({
           error: "An array of movies must be provided.",
         });
       }
-  
-      // Check for existing movies using unique identifiers
-      const existingMovies = await Movie.find({
-        title: { $in: movies.map((movie) => movie.title) },
+
+      const processedMovies = movies.map(movie => {
+        movie.cast = movie.cast.split(','); // Convert the comma-separated string to an array
+        return movie;
       });
   
-      const existingTitles = existingMovies.map((movie) => movie.title);
   
-      // Filter out duplicates
-      const uniqueMovies = movies.filter(
-        (movie) => !existingTitles.includes(movie.title)
-      );
+      const insertedMovies = [];
+      const skippedMovies = [];
   
-      
-      // Validate movie data (optional)
-      // Add validation logic here if needed
+      for (const movie of movies) {
+        const {
+          title,
+          description,
+          genre,
+          director,
+          producers,
+          cast,
+          runtime,
+          language,
+          rating,
+          ageRating,
+          release_date,
+          trailer,
+          country,
+          status,
+        } = movie;
   
-      // Insert unique movies into the database
-      let insertedMovies = [];
-      if (uniqueMovies.length > 0) {
-        insertedMovies = await Movie.insertMany(uniqueMovies, {
-          ordered: false,
+        // Validate required fields
+        if (
+          !title ||
+          !description ||
+          !genre ||
+          !director ||
+          !producers ||
+          !cast ||
+          !runtime ||
+          !language ||
+          !rating ||
+          !ageRating ||
+          !release_date ||
+          !country ||
+          !status
+        ) {
+          skippedMovies.push({
+            title,
+            reason: "Missing required fields.",
+          });
+          continue; // Skip this movie and move to the next
+        }
+  
+        // Check if the movie already exists
+        const existingMovie = await Movie.findOne({ title });
+        if (existingMovie) {
+          skippedMovies.push({
+            title,
+            reason: "Movie already exists.",
+          });
+          continue; // Skip this movie
+        }
+  
+        // Handle poster (assumes poster is provided as a file)
+        const poster = req.files?.find(
+          (file) => file.originalname === movie.posterFilename
+        )
+          ? `/uploads/poster/${
+              req.files.find((file) => file.originalname === movie.posterFilename)
+                .filename
+            }`
+          : null;
+  
+        // Validate arrays
+        /* You can uncomment this if needed
+        if (!Array.isArray(genre) || !Array.isArray(producers) || !Array.isArray(cast)) {
+          skippedMovies.push({
+            title,
+            reason: "Genre, producers, and cast must be arrays.",
+          });
+          continue; // Skip this movie
+        }
+        */
+  
+        // Convert cast IDs to an array of ObjectId if they are not already
+        const castIds = cast.map((id) => new mongoose.Types.ObjectId(id));
+  
+        // Create a new movie document
+        const newMovie = new Movie({
+          title,
+          description,
+          genre,
+          director,
+          producers,
+          cast: castIds, // Use the converted cast IDs
+          runtime,
+          language,
+          rating,
+          ageRating,
+          release_date,
+          trailer,
+          poster,
+          country,
+          status,
         });
+  
+        try {
+          // Save the movie to the database
+          const savedMovie = await newMovie.save();
+          insertedMovies.push(savedMovie);
+        } catch (saveError) {
+          console.error("Error saving movie:", saveError);
+          skippedMovies.push({
+            title,
+            reason: "Error saving the movie.",
+          });
+        }
       }
   
-      // Respond with success and details
+      // Respond with success and details of processed movies
       res.status(200).json({
         message: "Movies processed successfully.",
         insertedCount: insertedMovies.length,
-        skippedCount: existingTitles.length,
+        skippedCount: skippedMovies.length,
         insertedMovies,
-        skippedMovies: existingTitles,
+        skippedMovies,
       });
     } catch (error) {
-      console.error("Error adding movies:", error);
-  
-      if (error.writeErrors) {
-        const failedMovies = error.writeErrors.map((err) => err.err.op.title);
-        return res.status(207).json({
-          message: "Partial success. Some movies could not be added.",
-          insertedMovies,
-          failedMovies,
-        });
-      }
-  
+      console.error("Error processing movies:", error);
       res.status(500).json({ error: "Error adding the movies." });
     }
   }
