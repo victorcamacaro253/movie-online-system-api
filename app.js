@@ -4,6 +4,7 @@ import connectDB from "./config/db.js";
 import Routes from "./routes/index.js";
 import morgan from "morgan";
 import cors from "cors";
+import './jobs/scheduler.js'
 
 // Load environment variables
 config();

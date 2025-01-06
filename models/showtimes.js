@@ -18,7 +18,9 @@ const showtimeSchema = new Schema({
     end_time: {type: Date, required: true},
     total_seats: {type: Number, required: true},
     available_seats: {type: Number, required: true},
+    status: { type: String, enum: ['upcoming', 'ongoing', 'completed', 'canceled'], default: 'upcoming' },
     seats: { type: [seatSchema], required: true} },
+    
     {
         timestamps: true
     
