@@ -15,7 +15,7 @@ router.get('/theater/:theater_id',ShowtimeController.getShowtimesByTheater)
 
 router.get('/auditoriums/:auditorium_id',ShowtimeController.getShowtimesByAuditorium)
 
-router.get('/showtimes/date-range/:start_date/:end_date', ShowtimeController.getShowtimesByDateRange);
+router.get('/date-range/:start_date/:end_date', ShowtimeController.getShowtimesByDateRange);
 
 
 router.get("/:id", ShowtimeController.getShowtimeById);
