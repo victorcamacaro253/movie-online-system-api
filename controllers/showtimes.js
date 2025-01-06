@@ -125,8 +125,10 @@ class ShowtimeController {
 
               static async getShowtimesByAuditorium(req,res){
                 try {
-                  const {id} = req.params;
-                  const showtimes = await Showtime.find({auditorium_id:id})
+                  const {auditorium_id} = req.params;
+                  
+                  const showtimes = await Showtime.find({auditorium_id:auditorium_id})
+                 
                   .populate({
                     path: 'movie_id', // Populate the movie document
                     populate: {
@@ -179,6 +181,27 @@ class ShowtimeController {
                 }
             }
             
+            static async getShowtimesByStatus(req,res){
+              try{
+                const {status} = req.query;
+
+                if (!status) {
+                  return res.status(400).json({ msg: 'Status is required' });
+              }
+      
+                const showtimes = await Showtime.find({status})
+
+                if (showtimes.length === 0) {
+                  return res.status(404).json({ msg: `No showtimes found with status: ${status}` });
+              }
+      
+
+                res.json(showtimes);
+                }catch(error){
+                  console.error(error);
+                  res.status(500).json({msg: 'Error in getting showtimes'});
+                  }
+            }
 
             static async getShowtimesByDateRange(req, res) {
               try {
@@ -250,6 +273,7 @@ class ShowtimeController {
             static async getShowtimesByTheater(req,res){
               try {
                 const {theater_id} = req.params;
+
                 const showtimes = await Showtime.find({auditorium_id:theater_id})
                 .populate({
                   path: 'movie_id',
