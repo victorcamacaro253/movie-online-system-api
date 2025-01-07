@@ -10,11 +10,15 @@ router.get('/',Movies.getAllMovies)
 
 router.get('/playing',Movies.getMoviesCurrentlyPlaying)
 
+router.get('/page',Movies.getPaginatedMovies)
+
 
 router.get('/movie/:title',Movies.getMovieByTitle)
 
 
 router.get('/genre',Movies.getMoviesByGenre)
+
+router.get('/playingByTheater',Movies.getMoviesPlayingByTheater)
 
 
 router.get('/actor/:name',Movies.getMoviesByActorName)
@@ -30,6 +34,9 @@ router.get('/d/',Movies.getMoviesByYear)
 
 
 router.get('/date',Movies.getMoviesByDateRange)
+
+
+router.get('/status',Movies.getMoviesByStatus)
 
 
 router.get('/:id',Movies.getMovieById)

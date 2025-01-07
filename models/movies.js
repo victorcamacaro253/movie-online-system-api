@@ -1,5 +1,7 @@
 import { Schema, model } from "mongoose";
 import Actor from "./actors.js"; // Import the Actor model
+import mongoosePaginate from 'mongoose-paginate-v2';
+
 
 
 const movieSchema = new Schema(
@@ -73,6 +75,7 @@ const movieSchema = new Schema(
   }
 );
 
+movieSchema.plugin(mongoosePaginate);
 // Crear el modelo
 const Movie = model("movies", movieSchema);
 

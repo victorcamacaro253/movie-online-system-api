@@ -1,5 +1,6 @@
 import Movie from '../models/movies.js'
 import Actor from '../models/actors.js'
+import Showtime from '../models/showtimes.js';
 import mongoose from 'mongoose';
 
 class Movies {
@@ -116,7 +117,85 @@ class Movies {
 
   }
 
-
+  static async getMoviesPlayingByTheater(req, res) {
+    try {
+      const { theater, status = "playing" } = req.query; // Default status to "playing"
+  
+      // Step 1: Find all showtimes for the given theater
+      const showtimes = await Showtime.find({ theater_id: theater })
+        .populate({
+          path: 'movie_id',
+          match: { status }, // Filter movies by the given status
+          select: 'title description genre director producers cast runtime language ageRating poster  status', // Fetch only relevant movie fields
+          populate: { 
+            path: 'cast', 
+            select: 'name image' // Populate cast details (name and image)
+          }
+        });
+  
+      // Step 2: Filter out showtimes with no movie match
+      const validShowtimes = showtimes.filter((showtime) => showtime.movie_id);
+  
+      if (!validShowtimes.length) {
+        return res.status(404).json({ message: "No movies found for the given theater and status" });
+      }
+  
+      // Step 3: Group showtimes by movie
+      const movies = validShowtimes.reduce((result, showtime) => {
+        const movieId = showtime.movie_id._id.toString();
+  
+        // Check if movie is already in the result
+        const movieIndex = result.findIndex((movie) => movie.movie_id === movieId);
+  
+        if (movieIndex === -1) {
+          // Add new movie entry with initial showtime
+          result.push({
+            movie_id: movieId,
+            title: showtime.movie_id.title,
+            description:showtime.movie_id.description,
+            genre:showtime.movie_id.genre,
+            director: showtime.movie_id.director,
+            producers: showtime.movie_id.producers,
+            cast: showtime.movie_id.cast,
+            runtime: showtime.movie_id.runtime,
+            language: showtime.movie_id.language,
+            ageRating: showtime.movie_id.ageRating,
+            poster: showtime.movie_id.poster,
+            status: showtime.movie_id.status,
+            showtimes: [
+              {
+                start_time: showtime.start_time,
+                end_time: showtime.end_time,
+                auditorium_id: showtime.auditorium_id,
+                available_seats: showtime.available_seats,
+              },
+            ],
+          });
+        } else {
+          // Add the showtime to the existing movie entry
+          result[movieIndex].showtimes.push({
+            start_time: showtime.start_time,
+            end_time: showtime.end_time,
+            auditorium_id: showtime.auditorium_id,
+            available_seats: showtime.available_seats,
+          });
+        }
+  
+        return result;
+      }, []);
+  
+      const total_movies = movies.length;
+  
+      res.json({
+        movies,
+        total_movies,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error fetching movies" });
+    }
+  }
+  
   static async countMoviesByGenre(req,res){
     try {
       const genreCounts= await Movie.aggregate([
@@ -250,6 +329,36 @@ class Movies {
 
   }
 
+  static async getMoviesByStatus(req,res){
+    try {
+      const {status}= req.query
+      const movies = await Movie.find({status}).populate("cast","name image");
+      if (!movies || movies.length === 0) {
+        return res.status(404).json({ message: "No movies found with the specified status" });
+          }
+          res.json({ movies, totalMovies: movies.length });
+          } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Error fetching movies" });
+            }
+
+  }
+
+  static async getPaginatedMovies(req, res) {
+    try {
+      // Set default values for page and limit if not provided
+      const page = parseInt(req.query.page) || 1; // Default to page 1
+      const limit = parseInt(req.query.limit) || 10; // Default to 10 items per page
+  
+      const movies = await Movie.paginate({}, { page, limit });
+  
+      res.json(movies);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Error fetching movies" });
+    }
+  }
+  
 
   static async addMovie(req, res) {
     console.log(req.body)
