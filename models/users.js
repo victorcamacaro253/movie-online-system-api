@@ -35,7 +35,7 @@ const userSchema = new Schema({
         type: String,
         enum: ['active', 'inactive'],default:'active',
     },
-    card:{
+    cards:{
         debit :{
             type:String
             },
