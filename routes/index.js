@@ -6,6 +6,7 @@ import theaters from "./theaters.js";
 import showtimes from "./showtimes.js";
 import Auditorium from "./auditoriums.js";
 import users from "./users.js";
+import authentication from "./authentication.js";
 
 const router= Router()
 
@@ -22,6 +23,8 @@ router.use('/showtimes',showtimes)
 router.use('/auditoriums',Auditorium)
 
 router.use('/users',users)
+
+router.use('/authentication',authentication)
 
 
 export default router;

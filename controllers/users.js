@@ -209,7 +209,7 @@ if (!passwordRegex.test(password)) {
             existingUserMap.set(existingUser.username, "username");
             existingUserMap.set(existingUser.email, "email");
             existingUserMap.set(existingUser.phone, "phone");
-            existingUserMap.set(existingUser.personalID, "personalID");
+            existingUserMap.set(existingUser.personal_ID, "personalID");
         }
 
         // Process each user
@@ -247,7 +247,7 @@ if (!passwordRegex.test(password)) {
                 email,
                 password: hashedPassword,
                 phone,
-                personalID,
+                personal_ID:personalID,
                 profile_image,
                 cards,
                 birthdate,
