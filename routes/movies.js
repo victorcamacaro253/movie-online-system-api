@@ -48,10 +48,10 @@ router.put('/:id',Movies.updateMovie)
 router.put('/status/:id',Movies.updateStatus)
 
 
-router.post('/',upload.single('poster'),Movies.addMovie)
+router.post('/',upload.fields([{name:"poster"},{name:"images"}]),Movies.addMovie)
 
 
-router.post('/addMultipleMovies',upload.array('poster'),Movies.addMultipleMovies)
+router.post('/addMultipleMovies',upload.fields([{name:"poster"},{name:"images"}]),Movies.addMultipleMovies)
 
 
 router.delete('/:id',Movies.deleteMovie)

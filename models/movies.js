@@ -60,6 +60,10 @@ const movieSchema = new Schema(
     poster: {
       type: String, // Ruta a la imagen del póster
     },
+    images: [{
+      path : String, // Ruta a la imagen
+      description : String, // Descripción de la imagen
+      }],
     country: {
       type: String,
       required: true,

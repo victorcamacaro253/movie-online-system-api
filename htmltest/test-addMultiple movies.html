@@ -63,6 +63,9 @@
 
         <label for="poster">Poster:</label>
         <input type="file" name="poster" accept="image/*" required><br><br>
+
+        <label for="images">Imágenes Adicionales:</label>
+        <input type="file" id="images" name="images[]" accept="image/*" multiple><br><br>
       </div>
     </div>
 
@@ -157,6 +160,9 @@
         </select><br><br>
         <label for="poster">Poster:</label>
         <input type="file" name="poster" accept="image/*" required><br><br>
+
+            <label for="images">Imágenes Adicionales:</label>
+<input type="file" id="images" name="images[]" accept="image/*" multiple><br><br>
       `;
 
       // Populate the new select with actor options
@@ -178,7 +184,7 @@
   // Create a FormData object to handle multipart data
   const formData = new FormData();
   const movieEntries = document.querySelectorAll(".movieEntry");
-
+console.log(movieEntries)
   // Loop through all movie entries and append data
   movieEntries.forEach((entry, index) => {
     formData.append(`movies[${index}][title]`, entry.querySelector('input[name="title"]').value);
@@ -199,10 +205,25 @@
     formData.append(`movies[${index}][release_date]`, entry.querySelector('input[name="release_date"]').value);
     formData.append(`movies[${index}][country]`, entry.querySelector('input[name="country"]').value);
     formData.append(`movies[${index}][status]`, entry.querySelector('select[name="status"]').value);
-    formData.append(`movies[${index}][poster]`, entry.querySelector('input[name="poster"]').files);
-  });
+   // formData.append(`movies[${index}][poster]`, entry.querySelector('input[name="poster"]').files);
 
+   const poster = entry.querySelector('input[name="poster"]').files[0];
+    if (poster) {
+      formData.append(`movies[${index}][poster]`, poster);
+    }
+
+          // Append additional images
+     const images = entry.querySelector('input[name="images[]"]').files; // Ensure the name matches
+     for (let i = 0; i < images.length; i++) {
+      formData.append(`movies[${index}][images][${i}]`, images[i]);
+    }
+  
+
+
+  });
   // Send data to the server
+
+ 
   try {
     const response = await fetch("http://localhost:5000/movies/addMultipleMovies", {
       method: "POST",

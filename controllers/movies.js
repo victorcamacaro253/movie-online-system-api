@@ -408,7 +408,11 @@ class Movies {
         return res.status(400).json({error: "Movie already exists"})
       }
 
-      const poster = req.file ? `/uploads/poster/${req.file.filename}` : null;
+     // const poster = req.file ? `/uploads/poster/${req.file.filename}` : null;
+     const poster = req.files.poster
+      ? `/uploads/posters/${req.files.poster[0].filename}`
+      : null;
+
       // Validate arrays
      /* if (!Array.isArray(genre) || !Array.isArray(producers) || !Array.isArray(cast)) {
         return res.status(400).json({
@@ -418,7 +422,17 @@ class Movies {
 
         // Convert cast IDs to an array of ObjectId if they are not already
     const castIds = cast.map(id => new mongoose.Types.ObjectId(id));
-
+console.log(req.files.images)
+      // Process additional images with descriptions
+      const images = [];
+      if (req.files.images) {
+        req.files.images.forEach((file, index) => {
+          images.push({
+            path: `/uploads/movies/${file.filename}`, // Save the uploaded file path
+            description: req.body[`images[${index}][description]`] || "", // Save the description
+          });
+        });
+      }
   
       // Create a new movie document
       const newMovie = new Movie({
@@ -438,6 +452,7 @@ class Movies {
         poster,
         country,
         status,
+        images
       });
   
       // Save the movie to the database
@@ -507,6 +522,7 @@ class Movies {
   
   static async addMultipleMovies(req, res) {
     console.log(req.body)
+    console.log(req.files)
     try {
       const { movies } = req.body; // Array of movies sent in the request
   
@@ -578,14 +594,18 @@ class Movies {
         }
   
         // Handle poster (assumes poster is provided as a file)
-        const poster = req.files?.find(
+       /* const poster = req.files?.find(
           (file) => file.originalname === movie.posterFilename
         )
           ? `/uploads/poster/${
               req.files.find((file) => file.originalname === movie.posterFilename)
                 .filename
             }`
-          : null;
+          : null; */
+
+          const poster = req.files.poster
+      ? `/uploads/posters/${req.files.poster[0].filename}`
+      : null;
   
         // Validate arrays
         /* You can uncomment this if needed
@@ -600,6 +620,16 @@ class Movies {
   
         // Convert cast IDs to an array of ObjectId if they are not already
         const castIds = cast.map((id) => new mongoose.Types.ObjectId(id));
+
+        const images = [];
+      if (req.files.images) {
+        req.files.images.forEach((file, index) => {
+          images.push({
+            path: `/uploads/movies/${file.filename}`, // Save the uploaded file path
+            description: req.body[`images[${index}][description]`] || "", // Save the description
+          });
+        });
+      }
   
         // Create a new movie document
         const newMovie = new Movie({
@@ -618,6 +648,7 @@ class Movies {
           poster,
           country,
           status,
+          images
         });
   
         try {

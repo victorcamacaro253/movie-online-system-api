@@ -60,6 +60,9 @@
     <label for="poster">Poster:</label>
     <input type="file" id="poster" name="poster" accept="image/*" required><br><br>
 
+    <label for="images">Imágenes Adicionales:</label>
+    <input type="file" id="images" name="images" accept="image/*" multiple><br><br>
+
     <button type="submit">Agregar Película</button>
   </form>
 
@@ -132,6 +135,13 @@
       formData.append("country", document.getElementById("country").value);
       formData.append("status", document.getElementById("status").value);
       formData.append("poster", document.getElementById("poster").files[0]);
+
+            // Append additional images (if any)
+            const images = document.getElementById("images").files;
+      for (let i = 0; i < images.length; i++) {
+        formData.append("images", images[i]);
+      }
+
 
       try {
         const response = await fetch("http://localhost:5000/movies", {
