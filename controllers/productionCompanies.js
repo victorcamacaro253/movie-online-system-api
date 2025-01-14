@@ -1,4 +1,4 @@
-import ProductionCompanyModel from "../models/productionCompanies";
+import ProductionCompanyModel from "../models/productionCompanies.js";
 
 class ProductionCompany {
 
