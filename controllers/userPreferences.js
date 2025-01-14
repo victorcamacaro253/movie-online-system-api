@@ -7,7 +7,8 @@ class userPreferences{
     static async getAllUsersPreferences(req,res){
             try {
 
-                const preferences = userPreferencesModel.find().populate('userId').populate('favoriteActors')
+                const preferences = await userPreferencesModel.find().populate("userId").populate("favoriteActors")
+                
                 res.json(preferences)
                 
             } catch (error) {
