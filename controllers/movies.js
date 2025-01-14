@@ -1,5 +1,6 @@
 import Movie from '../models/movies.js'
 import Actor from '../models/actors.js'
+import ProductionCompany from '../models/productionCompanies.js';
 import Showtime from '../models/showtimes.js';
 import mongoose from 'mongoose';
 
@@ -7,9 +8,9 @@ class Movies {
     
   static async getAllMovies(req, res) {
     try {
-      const movies = await Movie.find().populate("cast","name image");
+      const movies = await Movie.find().populate("cast","name image").populate("productionCompany","name");
     //  console.log("Fetched Movies:", movies); // Log fetched movies
-
+      
       if (movies.length === 0) {
         return res.status(404).json({ message: "No movies found" });
       }
@@ -31,7 +32,7 @@ class Movies {
     
     try{
      
-      const movie = await Movie.findOne({ title: { $regex: new RegExp(`^${title}$`, 'i') } }).populate("cast","name image");
+      const movie = await Movie.findOne({ title: { $regex: new RegExp(`^${title}$`, 'i') } }).populate("cast","name image").populate("productionCompany","name");
 
       if(!movie){
         return res.status(404).json({message:"Movie not found"});
@@ -59,7 +60,7 @@ class Movies {
       // Buscar películas dentro del rango
       const movies = await Movie.find({
         release_date: { $gte: startDate, $lte: endDate },
-      }).populate("cast","name image");
+      }).populate("cast","name image").populate("productionCompany","name");
   
       if (!movies || movies.length === 0) {
         return res.status(404).json({ message: "No movies found for the given date" });
@@ -80,7 +81,7 @@ class Movies {
  static async getMoviesByGenre(req, res) {
   const { genre } = req.query;
   try{
-    const movies = await Movie.find({ genre:  { $regex: new RegExp(`^${genre}$`, 'i') } }).populate("cast","name image");
+    const movies = await Movie.find({ genre:  { $regex: new RegExp(`^${genre}$`, 'i') } }).populate("cast","name image").populate("productionCompany","name");
     if(!movies || movies.length === 0){
       return res.status(404).json({message:"No movies found for the given genre"});
       }
@@ -99,7 +100,7 @@ class Movies {
 
   static async getMoviesCurrentlyPlaying(req,res){
     try{
-      const movies = await Movie.find({status: "playing"}).populate("cast","name image");
+      const movies = await Movie.find({status: "playing"}).populate("cast","name image").populate("productionCompany","name");
       if(!movies || movies.length === 0){
         return res.status(404).json({message:"No movies found for the given date"});
         }
@@ -131,7 +132,7 @@ class Movies {
             path: 'cast', 
             select: 'name image' // Populate cast details (name and image)
           }
-        });
+        }).populate("productionCompany","name");
   
       // Step 2: Filter out showtimes with no movie match
       const validShowtimes = showtimes.filter((showtime) => showtime.movie_id);
@@ -227,7 +228,7 @@ class Movies {
   static async getMovieById(req,res){
     const {id}= req.params
     try {
-      const movie = await Movie.findById(id).populate("cast","name image");
+      const movie = await Movie.findById(id).populate("cast","name image").populate("productionCompany","name");
 
       if (!movie) {
         return res.status(404).json({ message: "Movie not found" });
@@ -245,7 +246,7 @@ class Movies {
   static async getMoviesByActor(req,res){
     const {id}= req.params
     try {
-      const movies = await Movie.find({$or:[{cast:id},{director:id}]}).populate("cast","name image");
+      const movies = await Movie.find({$or:[{cast:id},{director:id}]}).populate("cast","name image").populate("productionCompany","name");
       if (!movies || movies.length === 0) {
         return res.status(404).json({ message: "No movies found" });
         }
@@ -281,7 +282,7 @@ class Movies {
       // Step 3: Find movies where the actor is in the cast or is the director
       const movies = await Movie.find({
         $or: [{ cast: { $in: actorIds } }, { director: { $in: actorIds } }],
-      }).populate("cast", "name image").select("title genre release_date bookings_count").populate("director", "name image");
+      }).populate("cast", "name image").select("title genre release_date bookings_count").populate("director", "name image").populate("productionCompany","name");
   
       if (!movies || movies.length === 0) {
         return res.status(404).json({ message: "No movies found for this actor" });
@@ -313,7 +314,8 @@ class Movies {
           $gte: new Date(startDate),
           $lte: new Date(endDate)
           }
-          }).populate("cast","name image");
+          }).populate("cast","name image")
+          .populate("productionCompany","name");
 
        if (!movies || movies.length === 0) {
       return res.status(404).json({ message: "No movies found in the specified date range" });
@@ -332,7 +334,7 @@ class Movies {
   static async getMoviesByStatus(req,res){
     try {
       const {status}= req.query
-      const movies = await Movie.find({status}).populate("cast","name image");
+      const movies = await Movie.find({status}).populate("cast","name image").populate("productionCompany","name");
       if (!movies || movies.length === 0) {
         return res.status(404).json({ message: "No movies found with the specified status" });
           }
@@ -533,11 +535,7 @@ console.log(req.files.images)
         });
       }
 
-      const processedMovies = movies.map(movie => {
-        movie.cast = movie.cast.split(','); // Convert the comma-separated string to an array
-        return movie;
-      });
-  
+      
   
       const insertedMovies = [];
       const skippedMovies = [];
@@ -618,19 +616,13 @@ console.log(req.files.images)
         }
         */
   
-        // Convert cast IDs to an array of ObjectId if they are not already
         const castIds = cast.map((id) => new mongoose.Types.ObjectId(id));
 
-        const images = [];
-      if (req.files.images) {
-        req.files.images.forEach((file, index) => {
-          images.push({
-            path: `/uploads/movies/${file.filename}`, // Save the uploaded file path
-            description: req.body[`images[${index}][description]`] || "", // Save the description
-          });
-        });
-      }
-  
+        // Handle images
+  const images = req.files.images ? req.files.images.map(file => ({
+    path: `/uploads/movies/${file.filename}`,
+    description: "", // You can add logic to handle descriptions if needed
+  })) : [];
         // Create a new movie document
         const newMovie = new Movie({
           title,

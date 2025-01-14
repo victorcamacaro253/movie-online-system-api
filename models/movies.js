@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import Actor from "./actors.js"; // Import the Actor model
 import mongoosePaginate from 'mongoose-paginate-v2';
-
+import ProductionCompany from "./productionCompanies.js";
 
 
 const movieSchema = new Schema(
@@ -52,6 +52,11 @@ const movieSchema = new Schema(
     },
     release_date: {
       type: Date,
+      required: true,
+    },
+    productionCompany:{
+      type: Schema.Types.ObjectId,
+      ref: "production_companies",
       required: true,
     },
     trailer: {
