@@ -146,8 +146,8 @@ static async createUserPreferences(req,res){
                             try{
 
                                 const updatePreferences= await userPreferencesModel.findByIdAndUpdate(
-                                    id,
-                                    {$addToSet:{favoriteGenres:genre}},
+                                    {_id: id},
+                                    {$addToSet:{preferredGenres:genre}},
                                     {new: true}
                                     )
 

@@ -380,6 +380,7 @@ class Movies {
         trailer,
         country,
         status,
+        productionCompany
       } = req.body;
   
       // Validate required fields
@@ -454,7 +455,8 @@ console.log(req.files.images)
         poster,
         country,
         status,
-        images
+        images,
+        productionCompany
       });
   
       // Save the movie to the database
@@ -556,6 +558,7 @@ console.log(req.files.images)
           trailer,
           country,
           status,
+          productionCompany
         } = movie;
   
         // Validate required fields
@@ -640,7 +643,8 @@ console.log(req.files.images)
           poster,
           country,
           status,
-          images
+          images,
+          productionCompany
         });
   
         try {
