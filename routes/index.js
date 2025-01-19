@@ -9,6 +9,8 @@ import users from "./users.js";
 import authentication from "./authentication.js";
 import productionCompany from "./productionCompanies.js";
 import userPreferences from "./userPreferences.js";
+import userHistory from "./usersHistory.js";
+import bookings from "./bookings.js";
 
 const router= Router()
 
@@ -31,6 +33,11 @@ router.use('/authentication',authentication)
 router.use('/productionCompany',productionCompany)
 
 router.use('/userPreferences',userPreferences)
+
+router.use('/userHistory',userHistory)
+
+
+router.use('/bookings',bookings)
 
 
 export default router;
