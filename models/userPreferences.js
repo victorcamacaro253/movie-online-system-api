@@ -12,7 +12,7 @@ const userPreferencesSchema = new Schema(
       type: [String], // Array de cadenas para almacenar los géneros preferidos
       required: true,
     },
-    favoriteActors: {
+    favoriteActors: { 
       type: [Schema.Types.ObjectId], // Array de ObjectIds que probablemente se refieren a actores
       ref: 'Actor', // Nombre de la colección de actores (si existe)
       default: [], // Valor predeterminado como un array vacío

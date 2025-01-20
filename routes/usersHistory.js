@@ -5,5 +5,7 @@ const router = Router();
 
 router.get('/',UserHistory.getAllUsersHistory)
 
+router.get('/:userId',UserHistory.getUserHistory)
+
 
 export default router
