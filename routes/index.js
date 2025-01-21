@@ -11,6 +11,7 @@ import productionCompany from "./productionCompanies.js";
 import userPreferences from "./userPreferences.js";
 import userHistory from "./usersHistory.js";
 import bookings from "./bookings.js";
+import tickePrices from "./ticketPrices.js";
 
 const router= Router()
 
@@ -38,6 +39,8 @@ router.use('/userHistory',userHistory)
 
 
 router.use('/bookings',bookings)
+
+router.use('/ticketPrices',tickePrices)
 
 
 export default router;
