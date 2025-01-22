@@ -5,5 +5,7 @@ const router = Router()
 
 router.get('/',Booking.getBooking)
 
+router.post('/',Booking.createBooking)
+
 
 export default router;  
