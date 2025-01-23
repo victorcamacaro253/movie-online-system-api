@@ -6,6 +6,7 @@ import http from 'http';
 import { setupWebSocket } from './services/webSocket.js'; // Importa la función para configurar WebSocket
 import morgan from "morgan";
 import cors from "cors";
+import helmet from 'helmet';
 import './jobs/scheduler.js'
 
 // Load environment variables
@@ -24,6 +25,9 @@ setupWebSocket(server);
 
 
 app.use(cors())
+
+app.use(helmet());
+
 
 app.use(morgan('dev'))
 // Middleware

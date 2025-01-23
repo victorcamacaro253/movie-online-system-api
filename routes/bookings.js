@@ -7,5 +7,7 @@ router.get('/',Booking.getBooking)
 
 router.post('/',Booking.createBooking)
 
+router.post('/bookSeat',Booking.bookSeat)
+
 
 export default router;  

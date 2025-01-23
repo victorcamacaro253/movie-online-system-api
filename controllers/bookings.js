@@ -1,6 +1,7 @@
 import BookingModel from "../models/bookings.js";
 import TicketPrice from "../models/ticketPrices.js";
 import { getIo } from "../services/webSocket.js";
+import Showtime from "../models/showtimes.js";
 
 
 class Booking {
@@ -13,6 +14,50 @@ class Booking {
                 res.status(500).json({ message: error.message });
                 }
             
+    }
+
+    static async bookSeat(req,res){
+        try {
+         const {seat_id,showtime_id}=req.body;
+
+          console.log(seat_id,showtime_id);
+
+         const showtime = await Showtime.findById(showtime_id);
+
+         if(!showtime){
+          return res.status(404).json({message:'Showtime not found'});
+         }
+
+         const seat = showtime.seats.find(seat => seat._id.toString() === seat_id);
+
+         if(!seat){
+             return res.status(404).json({message:'Seat not found'});
+         }
+
+         if(seat.is_booked){
+             return res.status(400).json({message:'Seat already booked'});
+         }
+
+            seat.is_booked=true;
+
+            showtime.available_seats -=1;
+
+            await showtime.save();
+
+            const io = getIo();
+            console.log("WebSocket instance:", io);
+
+            const seatData = { seat_id, showtime_id, status: "booked" };
+            io.emit("seatBooked", seatData); // Emit the event
+          //  console.log("Seat booked WebSocket event emitted:", seatData);
+    
+            
+            return res.status(200).json({message:'Seat booked successfully'});
+
+        }catch(error){
+
+            return res.status(500).json({message:error.message});
+        }
     }
 
     static async createBooking(req,res){
