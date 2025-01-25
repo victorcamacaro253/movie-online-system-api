@@ -22,13 +22,13 @@ class Booking {
 
           console.log(seat_id,showtime_id);
 
-         const showtime = await Showtime.findById(showtime_id);
+        const showtime = await Showtime.findById(showtime_id);
 
          if(!showtime){
           return res.status(404).json({message:'Showtime not found'});
          }
 
-         const seat = showtime.seats.find(seat => seat._id.toString() === seat_id);
+       const seat = showtime.seats.find(seat => seat._id.toString() === seat_id);
 
          if(!seat){
              return res.status(404).json({message:'Seat not found'});
@@ -44,8 +44,29 @@ class Booking {
 
             await showtime.save();
 
+            
+
+          /*  const showtime = await Showtime.findOneAndUpdate(
+                {
+                    _id: showtime_id, // Match the showtime
+                    "seats._id": seat_id, // Match the seat
+                    "seats.is_booked": false, // Ensure the seat is not already booked
+                },
+                {
+                    $set: { "seats.$.is_booked": true }, // Mark the seat as booked
+                    $inc: { available_seats: -1 }, // Decrement available seats
+                },
+                { new: true } // Return the updated document if successful
+            );
+            if (!showtime) {
+                return res.status(400).json({ message: "Seat already booked or not found" });
+            }
+            
+
+*/
+            
             const io = getIo();
-            console.log("WebSocket instance:", io);
+           // console.log("WebSocket instance:", io);
 
             const seatData = { seat_id, showtime_id, status: "booked" };
             io.emit("seatBooked", seatData); // Emit the event
