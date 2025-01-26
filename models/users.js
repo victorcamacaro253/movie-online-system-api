@@ -50,6 +50,9 @@ const userSchema = new Schema({
      birthdate: {
         type: Date
         },
+        google_id:{
+            type:String
+        },
 
 })
 

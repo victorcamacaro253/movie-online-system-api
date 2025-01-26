@@ -9,6 +9,8 @@ import morgan from "morgan";
 import helmet from 'helmet';
 import './jobs/scheduler.js'
 import cookieParser from "cookie-parser";
+import './controllers/socialMediaAuth.js';  // Asegúrate de que se configure passport
+
 
 // Load environment variables
 config();

@@ -132,7 +132,8 @@ class Movies {
             path: 'cast', 
             select: 'name image' // Populate cast details (name and image)
           }
-        }).populate("productionCompany","name");
+        })
+       
   
       // Step 2: Filter out showtimes with no movie match
       const validShowtimes = showtimes.filter((showtime) => showtime.movie_id);

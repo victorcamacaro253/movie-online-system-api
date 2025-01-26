@@ -9,6 +9,7 @@ import refreshTokens from '../models/refresh_tokens.js';
 
 
 
+
 class Authentication {
 
     static async login (req,res){
@@ -142,7 +143,7 @@ class Authentication {
              // const tokenRecord= await tokenModel.verifyExistingToken(refreshToken,decoded.id)
                const tokenRecord= await refreshTokens.findOne({token: refreshToken, user_id: decoded._id})
 
-               // Verificar si el token está revocado
+               // Verificar if token is revoked
                if (!tokenRecord || tokenRecord.length === 0 ) {
                 return res.status(403).json({ error: 'Invalid or revoked refresh token' });
                 }
@@ -162,6 +163,9 @@ class Authentication {
     
 
 }
+
+
+
 
 
 export default Authentication;
