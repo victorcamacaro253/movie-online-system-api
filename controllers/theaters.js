@@ -85,19 +85,29 @@ class Theater {
 
     }
 
-    static async getTheatersByMovie(req, res) {
-        const { movieId } = req.params;
+    static async getNearbyTheaters(req, res) {
+        const { lat, lng, radius = 10 } = req.query; // Radius in kilometers
         try {
-            const theaters = await TheaterModel.find({ 'movies.showing': movieId });
+            const theaters = await TheaterModel.find({
+                'location.coordinates': {
+                    $near: {
+                        $geometry: {
+                            type: 'Point',
+                            coordinates: [parseFloat(lng), parseFloat(lat)],
+                        },
+                        $maxDistance: radius * 1000, // Convert to meters
+                    },
+                },
+            });
     
             if (!theaters.length) {
-                return res.status(404).json({ message: "No theaters found for this movie" });
+                return res.status(404).json({ message: "No theaters found nearby" });
             }
     
             res.json(theaters);
         } catch (error) {
-            console.error("Error in getTheatersByMovie:", error);
-            res.status(500).json({ message: "Error fetching theaters by movie" });
+            console.error("Error in getNearbyTheaters:", error);
+            res.status(500).json({ message: "Error fetching nearby theaters" });
         }
     }
    

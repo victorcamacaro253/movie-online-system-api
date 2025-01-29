@@ -7,6 +7,8 @@ router.get('/',Theater.getAllTheaters)
 
 router.get('/page',Theater.getPagedTheaters)
 
+router.get('/nearby',Theater.getNearbyTheaters)
+
 router.get('/:id',Theater.getTheaterById)
 
 
