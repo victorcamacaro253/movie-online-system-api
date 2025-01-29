@@ -20,7 +20,7 @@ async (accessToken, refreshToken, profile, done)=>{
     try{
 
         let rows = await userModel.findOne({_id : profile.id})
-
+console.log(rows)
         if(rows){
             console.log('user exists')
             return done(null,rows)

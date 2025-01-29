@@ -5,7 +5,10 @@ const router= Router()
 
 router.get('/',Theater.getAllTheaters)
 
+router.get('/page',Theater.getPagedTheaters)
+
 router.get('/:id',Theater.getTheaterById)
+
 
 router.get('/name/:name',Theater.getTheaterByName)
 

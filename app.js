@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import './jobs/scheduler.js'
 import cookieParser from "cookie-parser";
 import './controllers/socialMediaAuth.js';  // Asegúrate de que se configure passport
+import limiter from './middleware/rateLimiter.js';
 
 
 // Load environment variables
@@ -46,6 +47,8 @@ app.use(morgan('dev'))
 app.use(json());
 
 app.disable('x-powered-by')
+
+app.use(limiter);
 
 
 app.use(Routes)

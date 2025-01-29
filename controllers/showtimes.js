@@ -273,8 +273,9 @@ class ShowtimeController {
             static async getShowtimesByTheater(req,res){
               try {
                 const {theater_id} = req.params;
+                console.log(theater_id)
 
-                const showtimes = await Showtime.find({auditorium_id:theater_id})
+                const showtimes = await Showtime.find({theater_id:theater_id})
                 .populate({
                   path: 'movie_id',
                   populate: {

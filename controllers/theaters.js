@@ -66,6 +66,40 @@ class Theater {
     }
 
 
+    static async getPagedTheaters(req,res){
+        const { page = 1, limit = 10 } = req.query; // Default to page 1 and limit 10
+
+        try {
+            const theaters = await TheaterModel.find().skip((page - 1) * limit).limit(limit *1).exec();
+
+            const count = await TheaterModel.countDocuments();
+            res.json({ theaters, 
+                totalPages: Math.ceil(count / limit),
+                currentPage: page
+            });
+
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: "Error fetching theaters", error: error.message });
+        }
+
+    }
+
+    static async getTheatersByMovie(req, res) {
+        const { movieId } = req.params;
+        try {
+            const theaters = await TheaterModel.find({ 'movies.showing': movieId });
+    
+            if (!theaters.length) {
+                return res.status(404).json({ message: "No theaters found for this movie" });
+            }
+    
+            res.json(theaters);
+        } catch (error) {
+            console.error("Error in getTheatersByMovie:", error);
+            res.status(500).json({ message: "Error fetching theaters by movie" });
+        }
+    }
    
 static async createTheater(req, res) {
     const {
