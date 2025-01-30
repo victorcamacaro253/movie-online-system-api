@@ -5,6 +5,9 @@ const router = Router();
 
 router.get('/',UserHistory.getAllUsersHistory)
 
+router.get('/totalGross',UserHistory.getTotalGross)
+
+
 router.get('/:userId',UserHistory.getUserHistory)
 
 

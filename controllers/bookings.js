@@ -5,16 +5,152 @@ import Showtime from "../models/showtimes.js";
 
 
 class Booking {
-
-    static async getBooking(req,res){
+    static async getBooking(req, res) {
         try {   
-            const booking = await BookingModel.find().populate('user_id','fullname username email ');
+            const booking = await BookingModel.find()
+                .populate('user_id', 'fullname username email')
+                .populate({
+                    path: 'showtime_id',
+                    model: 'showtimes',
+                    select: '-total_seats -available_seats -seats',
+                    populate: [
+                        {
+                            path: 'movie_id',
+                            model: 'movies',
+                            select: 'title'
+                        },
+                        {
+                            path: 'theater_id',
+                            model: 'theaters',
+                            select: 'name'
+                        },
+                        {
+                            path: 'auditorium_id',
+                            model: 'auditoriums',
+                            select: 'auditorium_number'
+                        }
+                    ]
+                });
+    
+            res.status(200).json(booking);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    }
+    
+    static async getBookingById (req,res){
+        try {
+            const {id} = req.params;
+            const booking = await BookingModel.findById(id)
+            .populate('user_id','fullname username email ')
+            .populate({
+                path: 'showtime_id',
+                model: 'showtimes',
+                select: '-total_seats -available_seats -seats',
+                populate: [
+                    {
+                        path: 'movie_id',
+                        model: 'movies',
+                        select: 'title'
+                    },
+                    {
+                        path: 'theater_id',
+                        model: 'theaters',
+                        select: 'name'
+                    },
+                    {
+                        path: 'auditorium_id',
+                        model: 'auditoriums',
+                        select: 'auditorium_number'
+                    }
+                ]
+            });
+            
+          //  .populate('ticket_id','price seat_number seat_type');
             res.status(200).json(booking);
             } catch (error) {
+                console.log(error);
                 res.status(500).json({ message: error.message });
                 }
-            
-    }
+                }
+
+                static async getBookingsByUserId(req, res) {
+                    try {
+                        const { userId } = req.params;
+                        console.log(userId);
+                
+                        // Get bookings and populate the showtime details
+                        const bookings = await BookingModel.find({ user_id: userId })
+                            .populate({
+                                path: 'showtime_id',
+                                model: 'showtimes',
+                                select: '-total_seats -available_seats -seats',
+                                populate: [
+                                    {
+                                        path: 'movie_id',
+                                        model: 'movies',
+                                        select: 'title'
+                                    },
+                                    {
+                                        path: 'theater_id',
+                                        model: 'theaters',
+                                        select: 'name'
+                                    },
+                                    {
+                                        path: 'auditorium_id',
+                                        model: 'auditoriums',
+                                        select: 'auditorium_number'
+                                    }
+                                ]
+                            });
+                
+                        // If no bookings found
+                        if (!bookings.length) {
+                            return res.status(404).json({ message: "No bookings found for this user" });
+                        }
+                        // Extract user data from the first booking
+                        const { fullname, username, email } = bookings[0].user_id;
+                
+                        // Calculate totalMoviesBooked (unique movie titles) & totalTicketsBought
+                        const movieTitles = new Set();
+                        let totalTicketsBought = 0;
+                
+                        const formattedBookings = bookings.map(booking => {
+                            const movieTitle = booking.showtime_id?.movie_id?.title;
+                            if (movieTitle) movieTitles.add(movieTitle);
+
+                            totalTicketsBought += booking.seats_booked.length; // Assuming 'seats_booked' is an array
+                
+                            return {
+                                _id: booking._id,
+                                showtime: booking.showtime_id,
+                                seats: booking.seats_booked,
+                                total_price: booking.total_price,
+
+                            };
+                        });
+                
+                        // Format the response
+                        const response = {
+                            user: {
+                                fullname,
+                                username,
+                                email
+                            },
+                            statistics: {
+                                totalMoviesBooked: movieTitles.size,
+                                totalTicketsBought
+                            },
+                            bookings: formattedBookings
+                        };
+                
+                        res.status(200).json(response);
+                    } catch (error) {
+                        console.error(error);
+                        res.status(500).json({ message: error.message });
+                    }
+                }
+                
 
     static async bookSeat(req,res){
         try {

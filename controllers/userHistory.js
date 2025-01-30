@@ -154,6 +154,26 @@ class UserHistory{
         }
       }
 
+
+      static async getTotalGross(req, res) {
+        try {
+          const result = await UserHistoryModel.aggregate([
+            { $unwind: "$bookingRecords" },
+            {
+              $group: {
+                _id: null,
+                totalGross: { $sum: "$bookingRecords.amountSpent" },
+              },
+            },
+          ]);
+    
+          const totalGross = result.length > 0 ? parseFloat(result[0].totalGross.toString()) : 0;
+          res.json({ totalGross });
+        } catch (error) {
+          handleError(res, error);
+        }
+      }
+
 }
 
 
