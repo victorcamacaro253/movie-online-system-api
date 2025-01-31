@@ -14,7 +14,7 @@ const bookingSchema = new Schema({
           type: {
             type: String,
             required: true,
-            enum: ['Adult', 'Student', 'Senior', 'Child'], // Add other types if needed
+            enum: ['standard', 'vip', 'child', 'Student','Adult','senior'],
           },
           price: {
             type: Number,

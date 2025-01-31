@@ -2,6 +2,8 @@ import BookingModel from "../models/bookings.js";
 import TicketPrice from "../models/ticketPrices.js";
 import { getIo } from "../services/webSocket.js";
 import Showtime from "../models/showtimes.js";
+import UserHistory from "../models/users_history.js";
+import mongoose from 'mongoose';
 
 
 class Booking {
@@ -151,6 +153,30 @@ class Booking {
                     }
                 }
                 
+                static async getTotalGrossed(req, res) {
+                    try {
+                
+                        // Get bookings for the user
+                        const bookings = await BookingModel.find();
+                
+                    
+                        console.log(bookings);
+                
+                        // Calculate total grossed
+                        const totalGrossed = bookings.reduce((total, booking) => {
+                            return total + booking.total_price; // Sum the total price of each booking
+                        }, 0);
+                
+                        // Format the response
+                        res.status(200).json({ totalGrossed });
+                    } catch (error) {
+                        console.error(error);
+                        res.status(500).json({ message: error.message });
+                    }
+                }
+                
+
+
 
     static async bookSeat(req,res){
         try {
@@ -217,7 +243,7 @@ class Booking {
         }
     }
 
-    static async createBooking(req,res){
+   /* static async createBooking(req,res){
      const {user_id,showtime_id,seats}=req.body;
      try {
         const ticketTypes = await TicketPrice.find({})
@@ -260,6 +286,81 @@ class Booking {
         
      }
     }
+
+    */
+
+    static async createBooking(req, res) {
+        const { user_id, showtime_id, seats } = req.body;
+       // const session = await mongoose.startSession(); // Start transaction
+        
+        try {
+          
+          // 1. Create Booking
+          const ticketTypes = await TicketPrice.find({})
+          console.log(ticketTypes)
+          let total_price = 0;
+       console.log(seats)
+          const seats_booked = seats.map(seat => {
+            const ticket = ticketTypes.find(t => t.type === seat.type);
+            if (!ticket) throw new Error(`Ticket type ${seat.type} not found`);
+            
+            total_price += ticket.price;
+            return {
+              seat: seat.seat,
+              type: seat.type,
+              price: ticket.price
+            };
+          });
+      
+          const booking = new BookingModel({
+            user_id,
+            showtime_id,
+            seats_booked,
+            total_price,
+            status: 'pending'
+          });
+      
+          await booking.save();
+      
+          // 2. Update User History
+          const showtime = await Showtime.findById(showtime_id);
+          if (!showtime) throw new Error("Showtime not found");
+      
+          await UserHistory.updateOne(
+            { userId: user_id },
+            {
+              $push: {
+                bookingRecords: {
+                  bookingId: booking._id,
+                  numberOfTickets: seats_booked.length // Derived from booking
+                }
+              },
+              $inc: {
+                totalMoviesBooked: 1,
+                totalAmountSpent: total_price
+              },
+              $addToSet: { // Prevent duplicate movie entries
+                watchedMovies: { 
+                  movieId: showtime.movie_id,
+                  watchedAt: new Date() 
+                }
+              }
+            },
+            { upsert: true } // Create user_history if it doesn't exist
+          );
+      
+          // 3. Emit real-time event
+          const io = getIo();
+          io.emit('seatBooked', { seats_booked: booking.seats_booked });
+      
+          res.status(201).json(booking);
+      
+        } catch (error) {
+        
+          console.error(error);
+          res.status(500).json({ message: error.message });
+        }
+      }
 
 }
 

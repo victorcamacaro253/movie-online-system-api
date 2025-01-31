@@ -7,6 +7,8 @@ router.get('/',Booking.getBooking)
 
 router.get('/user/:userId',Booking.getBookingsByUserId)
 
+router.get('/grossed',Booking.getTotalGrossed)
+
 
 router.get('/:id',Booking.getBookingById)
 
