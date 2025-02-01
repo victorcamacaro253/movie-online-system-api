@@ -266,6 +266,178 @@ class Booking {
                     }
                   }
 
+                  static async getGrossedByTheater(req, res) {
+                    try {
+                      const { theaterName } = req.query; // Get the theater name from query parameters
+                  
+                      if (!theaterName) {
+                        return res.status(400).json({ message: "Theater name is required." });
+                      }
+                  
+                      const result = await BookingModel.aggregate([
+                        {
+                          $lookup: {
+                            from: "showtimes",
+                            localField: "showtime_id",
+                            foreignField: "_id",
+                            as: "showtime"
+                          }
+                        },
+                        { $unwind: "$showtime" },
+                        {
+                          $lookup: {
+                            from: "theaters",
+                            localField: "showtime.theater_id",
+                            foreignField: "_id",
+                            as: "theater"
+                          }
+                        },
+                        { $unwind: "$theater" },
+                        {
+                          $match: {
+                            "theater.name": theaterName // Filter by the specified theater name
+                          }
+                        },
+                        {
+                          $group: {
+                            _id: "$theater.name",
+                            total: { $sum: "$total_price" },
+                            movies: { $addToSet: "$showtime.movie_id" }
+                          }
+                        },
+                        {
+                          $project: {
+                            theater: "$_id",
+                            total: 1,
+                            movies: 1,
+                            _id: 0
+                          }
+                        }
+                      ]);
+                  
+                      res.status(200).json(result.length > 0 ? result[0] : { message: "No data found for the specified theater." });
+                    } catch (error) {
+                      console.error(error);
+                      res.status(500).json({ message: error.message });
+                    }
+                  }
+
+                  static async getGrossedByCity(req, res) {
+                    try {
+                      const { city } = req.query; // Get the city name from query parameters
+                  
+                      if (!city) {
+                        return res.status(400).json({ message: "City name is required." });
+                      }
+                  
+                      const result = await BookingModel.aggregate([
+                        {
+                          $lookup: {
+                            from: "showtimes",
+                            localField: "showtime_id",
+                            foreignField: "_id",
+                            as: "showtime"
+                          }
+                        },
+                        { $unwind: "$showtime" },
+                        {
+                          $lookup: {
+                            from: "theaters",
+                            localField: "showtime.theater_id",
+                            foreignField: "_id",
+                            as: "theater"
+                          }
+                        },
+                        { $unwind: "$theater" },
+                        {
+                          $addFields: {
+                            normalizedCity: { $toLower: "$theater.city" } // Normalize city names
+                          }
+                        },
+                        {
+                          $match: {
+                            normalizedCity: city.toLowerCase() // Filter by the specified city
+                          }
+                        },
+                        {
+                          $group: {
+                            _id: "$normalizedCity",
+                            total: { $sum: "$total_price" },
+                            theaters: { $addToSet: "$theater.name" }
+                          }
+                        },
+                        {
+                          $project: {
+                            city: { $toTitleCase: "$_id" }, // Convert back to title case for display
+                            total: 1,
+                            theaters: 1,
+                            _id: 0
+                          }
+                        }
+                      ]);
+                  
+                      res.status(200).json(result.length > 0 ? result[0] : { message: "No data found for the specified city." });
+                    } catch (error) {
+                      console.error(error);
+                      res.status(500).json({ message: error.message });
+                    }
+                  }
+
+                  static async getGrossedByMovie(req, res) {
+                    try {
+                      const { movieTitle } = req.query; // Get the movie title from query parameters
+                  
+                      if (!movieTitle) {
+                        return res.status(400).json({ message: "Movie title is required." });
+                      }
+                  
+                      const result = await BookingModel.aggregate([
+                        {
+                          $lookup: {
+                            from: "showtimes",
+                            localField: "showtime_id",
+                            foreignField: "_id",
+                            as: "showtime"
+                          }
+                        },
+                        { $unwind: "$showtime" },
+                        {
+                          $lookup: {
+                            from: "movies",
+                            localField: "showtime.movie_id",
+                            foreignField: "_id",
+                            as: "movie"
+                          }
+                        },
+                        { $unwind: "$movie" },
+                        {
+                          $match: {
+                            "movie.title": movieTitle // Filter by the specified movie title
+                          }
+                        },
+                        {
+                          $group: {
+                            _id: "$movie.title",
+                            total: { $sum: "$total_price" },
+                            theaters: { $addToSet: "$showtime.theater_id" }
+                          }
+                        },
+                        {
+                          $project: {
+                            movie: "$_id",
+                            total: 1,
+                            theaters: 1,
+                            _id: 0
+                          }
+                        }
+                      ]);
+                  
+                      res.status(200).json(result.length > 0 ? result[0] : { message: "No data found for the specified movie." });
+                    } catch (error) {
+                      console.error(error);
+                      res.status(500).json({ message: error.message });
+                    }
+                  }
 
 
     static async bookSeat(req,res){

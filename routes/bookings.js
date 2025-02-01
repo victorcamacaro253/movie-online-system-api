@@ -9,6 +9,12 @@ router.get('/user/:userId',Booking.getBookingsByUserId)
 
 router.get('/grossed',Booking.getTotalGrossed)
 
+router.get('/grossed-by-movie',Booking.getGrossedByMovie)
+
+router.get('/grossed-by-theater',Booking.getGrossedByTheater)
+
+router.get('/groosed-by-city',Booking.getGrossedByCity)
+
 
 router.get('/:id',Booking.getBookingById)
 
