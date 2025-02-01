@@ -268,7 +268,7 @@ class Booking {
 
                   static async getGrossedByTheater(req, res) {
                     try {
-                      const { theaterName } = req.query; // Get the theater name from query parameters
+                      const { theaterName } = req.params; // Get the theater name from query parameters
                   
                       if (!theaterName) {
                         return res.status(400).json({ message: "Theater name is required." });
@@ -324,8 +324,8 @@ class Booking {
 
                   static async getGrossedByCity(req, res) {
                     try {
-                      const { city } = req.query; // Get the city name from query parameters
-                  
+                      const { city } = req.params; // Extract city from route parameters
+                  console.log(city);
                       if (!city) {
                         return res.status(400).json({ message: "City name is required." });
                       }
@@ -351,7 +351,7 @@ class Booking {
                         { $unwind: "$theater" },
                         {
                           $addFields: {
-                            normalizedCity: { $toLower: "$theater.city" } // Normalize city names
+                            normalizedCity: { $toLower: "$theater.location.city" } // Normalize city names
                           }
                         },
                         {
@@ -368,13 +368,20 @@ class Booking {
                         },
                         {
                           $project: {
-                            city: { $toTitleCase: "$_id" }, // Convert back to title case for display
+                            city: {
+                              $concat: [
+                                { $toUpper: { $substr: ["$_id", 0, 1] } }, // Capitalize the first letter
+                                { $substr: ["$_id", 1, { $subtract: [{ $strLenCP: "$_id" }, 1] }] } // Append the rest of the string
+                              ]
+                            },
                             total: 1,
                             theaters: 1,
                             _id: 0
                           }
                         }
                       ]);
+
+                      console.log(result);
                   
                       res.status(200).json(result.length > 0 ? result[0] : { message: "No data found for the specified city." });
                     } catch (error) {
@@ -383,9 +390,9 @@ class Booking {
                     }
                   }
 
-                  static async getGrossedByMovie(req, res) {
+                  static async getGrossedByMovieTitle(req, res) {
                     try {
-                      const { movieTitle } = req.query; // Get the movie title from query parameters
+                      const { movieTitle } = req.params; // Get the movie title from query parameters
                   
                       if (!movieTitle) {
                         return res.status(400).json({ message: "Movie title is required." });
