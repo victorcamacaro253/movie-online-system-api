@@ -1,7 +1,7 @@
 import { Schema,model } from "mongoose";
 import Showtime from "./showtimes.js";
 
-
+/*
 const bookingRecordSchema= new Schema({
     bookingId: {type: Schema.Types.ObjectId,ref:'bookings',required:true},
     amountSpent:{type: Number,required:true},
@@ -9,7 +9,7 @@ const bookingRecordSchema= new Schema({
     movieId:{type: Schema.Types.ObjectId,ref:'movies',required:true},
     numberOfTickets:{type:Number,required:true},
     showtimeId:{type:Schema.Types.ObjectId,ref:'showtimes',required:true}
-})
+})*/
 
 const UserHistorySchema= new Schema({
     userId:{type: Schema.Types.ObjectId,ref:'users',required:true},
@@ -28,7 +28,7 @@ const UserHistorySchema= new Schema({
         watchedAt:{type:Date,default: Date.now}
       }],
 
-      bookingRecords:[bookingRecordSchema],
+      bookingRecords: [{ type: Schema.Types.ObjectId, ref: 'bookings' }] // Add ref to bookings
     },{
         timestamps:true
     
