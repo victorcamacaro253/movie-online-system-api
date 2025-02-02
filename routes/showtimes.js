@@ -27,8 +27,9 @@ router.post("/", ShowtimeController.createShowtime);
 
 
 router.put("/:id", Showtime.updateShowtime);
-
-router.delete("/:id", Showtime.deleteShowtime);
 */
+
+router.delete("/:id", ShowtimeController.deleteShowtime);
+
 
 export default router;

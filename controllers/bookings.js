@@ -494,6 +494,42 @@ class Booking {
     }
 
    
+  static async unbookSeat(req, res) {
+    try {
+      const { seat_id, showtime_id } = req.body;
+
+      //Find the showtime by ID
+      const showtime = await Showtime.findById(showtime_id);
+
+      if (!showtime) {
+        return res.status(404).json({ message: 'Showtime not found' });
+        }
+        //Find the seat in the seats array
+        const seat = showtime.seats.find(seat => seat._id.toString() === seat_id);
+        if(!seat){
+          return res.status(404).json({message:'Seat not found'});
+          }
+          //Check if the seat is booked
+          if(!seat.is_booked){
+            return res.status(400).json({message:'Seat is not booked'});
+            }
+            //Unbook the seat
+            seat.is_booked=false;
+
+            showtime.available_seats +=1;
+
+            await showtime.save();
+
+            const io = getIo();
+            const seatData = { seat_id, showtime_id, status: "unbooked" };
+            io.emit("seatUnbooked", seatData); // Emit the event
+            return res.status(200).json({message:'Seat unbooked successfully'});
+            } catch (error) {
+              console.log(error);
+              return res.status(500).json({message:error.message});
+              }
+              }
+
 
     static async createBooking(req, res) {
         const { user_id, showtime_id, seats } = req.body;

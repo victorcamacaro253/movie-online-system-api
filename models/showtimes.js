@@ -16,6 +16,7 @@ const showtimeSchema = new Schema({
     auditorium_id: {type: Schema.Types.ObjectId, ref: "auditoriums", required: true},
     start_time: {type: Date, required: true},
     end_time: {type: Date, required: true},
+    date : {type: Date},
     total_seats: {type: Number, required: true},
     available_seats: {type: Number, required: true},
     status: { type: String, enum: ['upcoming', 'ongoing', 'completed', 'canceled'], default: 'upcoming' },

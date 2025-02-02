@@ -14,9 +14,6 @@ router.get('/grossedByTheater/:theaterName',Booking.getGrossedByTheater)
 
 
 
-
-
-
 router.get('/user/:userId',Booking.getBookingsByUserId)
 
 
@@ -28,6 +25,9 @@ router.get('/grossed',Booking.getTotalGrossed)
 router.post('/',Booking.createBooking)
 
 router.post('/bookSeat',Booking.bookSeat)
+
+router.post('/unbookSeat',Booking.unbookSeat)
+
 
 
 export default router;  

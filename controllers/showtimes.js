@@ -404,6 +404,74 @@ class ShowtimeController {
             }
         }
         
+        static async updateShowtime(req, res) {
+            try {
+                const { id } = req.params;
+                const { theater_id, auditorium_id, movie_id, start_time, end_time } = req.body;
+        
+                // Parse start_time and end_time to ensure they're Date objects
+                const startDate = new Date(start_time);
+                const endDate = new Date(end_time);
+        
+                // Check for overlapping showtimes in the same theater and auditorium
+                const existingShowtime = await Showtime.find({
+                    theater_id: theater_id,
+                    auditorium_id: auditorium_id,
+                    date: date,
+                    $or: [
+                        {
+                            start_time: { $lt: endDate }, // Check if the new start time is before an existing end time
+                            end_time: { $gt: startDate }  // Check if the new end time is after an existing start time
+                        }
+                    ]
+                });
+        
+                const hasOverlap = existingShowtime.some(show => show._id.toString() !== id);
+              if (hasOverlap) {
+              return res.status(400).json({ msg: 'There is an overlapping showtime for this theater and auditorium.' });
+              }
+                // If no overlap, update the showtime
+                const updatedShowtime = await Showtime.findByIdAndUpdate(id, {
+                    theater_id,
+                    auditorium_id,
+                    movie_id,
+                    start_time: startDate,
+                    end_time: endDate,
+                    date: date,
+                }, { new: true });
+        
+                if (!updatedShowtime) {
+                    return res.status(404).json({ msg: 'Showtime not found' });
+                }
+        
+                res.json(updatedShowtime);
+            } catch (error) {
+                console.error(error);
+                res.status(500).json({ msg: 'Error in updating showtime' });
+            }
+        }
+
+
+        static async deleteShowtime(req,res){
+          try {
+            const {id} = req.params;
+
+            if(!id){
+              return res.status(400).json({msg: 'Showtime id is required'})
+            }
+
+            const showtime = await Showtime.findByIdAndDelete(id);
+
+            if(!showtime){
+              return res.status(404).json({msg: 'Showtime not found'})
+            }
+
+            res.json(showtime);
+            } catch (error) {
+              console.log(error);
+              res.status(500).json({ msg: 'Error in deleting showtime' });
+              }
+        }
 
 }
 export default ShowtimeController;
