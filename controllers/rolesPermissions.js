@@ -6,10 +6,10 @@ class RolesPermissions {
     static async getAllRolesPermissions(req,res){
         try {
             const rolesPermissions = await rolesModel.find().
-            populate("permissions", "name");
+            populate("permissions", "name -_id");
             res.status(200).json(rolesPermissions);
         } catch (error) {
-            res.status(404).json({message: error.message});
+            res.status(500).json({message: error.message});
         }
     }
 
@@ -23,7 +23,7 @@ class RolesPermissions {
             if(!rolesPermissions) return res.status(404).json({message: "Roles not found"});
             res.status(200).json(rolesPermissions);
         } catch (error) {
-            res.status(404).json({message: error.message});
+            res.status(500).json({message: error.message});
         }
     }
 
@@ -33,7 +33,7 @@ class RolesPermissions {
             const permissions = permissionsModel.find();
             res.status(200).json(permissions);
         } catch (error) {
-            res.status(404).json({message: error.message});
+            res.status(500).json({message: error.message});
         }
     }
 
@@ -49,7 +49,7 @@ class RolesPermissions {
             if(!permissions) return res.status(404).json({message: "Permissions not found"});
             res.status(200).json(permissions);
         } catch (error) {
-            res.status(404).json({message: error.message});
+            res.status(500).json({message: error.message});
         }
     }
 
@@ -63,7 +63,7 @@ class RolesPermissions {
             const newPermissions = await permissionsModel.create({ name, description });
             res.status(201).json(newPermissions);
             } catch (error) {
-                res.status(404).json({ message: error.message });
+                res.status(500).json({ message: error.message });
             }
         }
 
@@ -73,7 +73,7 @@ class RolesPermissions {
         const { id } = req.params;
         const { name, description } = req.body;
         if (!id) {
-            return res.status(400).json({ message: "Id is required" });
+            return res.status(500).json({ message: "Id is required" });
             }
             try {
                 const permissions = await permissionsModel.findByIdAndUpdate(id, { name, description }, { new: true });
@@ -82,7 +82,7 @@ class RolesPermissions {
                     res.status(200).json(permissions);
                     }
                     catch (error) {
-                        res.status(404).json({ message: error.message });
+                        res.status(500).json({ message: error.message });
                         }
                         }
 
@@ -96,7 +96,7 @@ class RolesPermissions {
                 res.status(200).json({ message: "Permissions deleted successfully" });
                 }
                 catch (error) {
-                    res.status(404).json({ message: error.message });
+                    res.status(500).json({ message: error.message });
                     }
                     }
 
@@ -112,7 +112,7 @@ class RolesPermissions {
           // Check if the role already exists
           const existingRole = await rolesModel.findOne({ name });
           if (existingRole) {
-            return res.status(409).json({ message: "Role already exists." });
+            return res.status(404).json({ message: "Role already exists." });
           }
     
           // Validate permissions (ensure all permission IDs exist)
@@ -121,7 +121,7 @@ class RolesPermissions {
           });
     
           if (validPermissions.length !== permissions.length) {
-            return res.status(400).json({ message: "One or more permissions are invalid." });
+            return res.status(500).json({ message: "One or more permissions are invalid." });
           }
     
           // Create the new role
@@ -153,7 +153,7 @@ class RolesPermissions {
       if (name) {
         const existingRole = await rolesModel.findOne({ name });
         if (existingRole && existingRole._id.toString() !== id) {
-          return res.status(409).json({ message: "Role name already exists." });
+          return res.status(404).json({ message: "Role name already exists." });
         }
         role.name = name;
       }
