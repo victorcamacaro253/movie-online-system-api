@@ -53,6 +53,10 @@ const userSchema = new Schema({
         google_id:{
             type:String
         },
+        roleId :{
+            type: Schema.Types.ObjectId,
+            ref: 'roles'
+        },
 
 })
 

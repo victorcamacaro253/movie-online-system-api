@@ -13,6 +13,7 @@ import userHistory from "./usersHistory.js";
 import bookings from "./bookings.js";
 import tickePrices from "./ticketPrices.js";
 import rolesPermissions from "./rolesPermissions.js";
+import adminManager from "./adminManager.js";
 
 const router= Router()
 
@@ -45,6 +46,7 @@ router.use('/ticketPrices',tickePrices)
 
 router.use('/roles',rolesPermissions)
 
+router.use('/management',adminManager)
 
 
 export default router;

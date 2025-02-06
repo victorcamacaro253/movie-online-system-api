@@ -278,55 +278,6 @@ if (!passwordRegex.test(password)) {
 
 
 
-static async createAdminManager(req,res){
-    try {
-        const {  username,password,roleId,theaterId} = req.body;
-
-        const role = await rolesModel.findById(roleId);
-        if (!role) {
-            return res.status(404).json({ message: "Role not found" });
-        }
-
-        if(!['admin','manager'].includes(role.name)){
-            return res.status(400).json({ message: "Invalid role" });
-            }
-
-            // Validate theaterId for managers
-        if (role.name === 'manager' && !theaterId) {
-            return res.status(400).json({ error: 'Theater ID is required for managers' });
-        }
-
-        // Ensure admins don't have a theaterId
-        if (role.name === 'admin' && theaterId) {
-            return res.status(400).json({ error: 'Admins cannot have a theater ID' });
-        }
-
-        const existingUser= AdminManagerModel.findOne({username})
-        if(existingUser){
-            return res.status(400).json({ message: "Username already exists" });
-        }
-
-        const hashedPassword = await hash(password, 10);
-
-        const newUser = new AdminManagerModel({
-            username,
-            password: hashedPassword,
-            roleId,
-            theaterId: role.name === 'manager' ? theaterId : undefined, // Only include theaterId for managers
-
-            });
-
-            await newUser.save()
-
-            res.status(201).json(newUser)
-} catch (error) {
-    console.error("Error creating admin/manager:", error);
-    res.status(500).json({ message: "Error creating admin/manager", error: error.message });
-}
-
-
-}
-
 }
 
 export default User;
