@@ -46,6 +46,43 @@ class AdminManager {
                     }
                 }
             
+                static async getAdminById(req, res) {
+                    try {
+                        const { id } = req.params;
+                        const admin = await AdminManagerModel.findById(id).populate("roleId");
+            
+                        if (!admin) {
+                            return res.status(404).json({ message: "Admin not found" });
+                        }
+            
+                        if (admin.roleId.name !== "admin") {
+                            return res.status(400).json({ message: "User is not an admin" });
+                        }
+            
+                        res.json(admin);
+                    } catch (error) {
+                        res.status(500).json({ message: "Error retrieving admin", error: error.message });
+                    }
+                }
+            
+                static async getManagerById(req, res) {
+                    try {
+                        const { id } = req.params;
+                        const manager = await AdminManagerModel.findById(id).populate("roleId");
+            
+                        if (!manager) {
+                            return res.status(404).json({ message: "Manager not found" });
+                        }
+            
+                        if (manager.roleId.name !== "manager") {
+                            return res.status(400).json({ message: "User is not a manager" });
+                        }
+            
+                        res.json(manager);
+                    } catch (error) {
+                        res.status(500).json({ message: "Error retrieving manager", error: error.message });
+                    }
+                }
             
 
 static async createAdminManager(req,res){
@@ -98,8 +135,55 @@ static async createAdminManager(req,res){
     res.status(500).json({ message: "Error creating admin/manager", error: error.message });
 }
 
+ 
 
 }
+
+
+
+
+    // Delete Admin
+    static async deleteAdmin(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await AdminManagerModel.findById(id).populate("roleId");
+
+            if (!user) {
+                return res.status(404).json({ message: "Admin not found" });
+            }
+
+            if (user.roleId.name !== "admin") {
+                return res.status(400).json({ message: "User is not an admin" });
+            }
+
+            await AdminManagerModel.findByIdAndDelete(id);
+            res.status(200).json({ message: "Admin deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "Error deleting admin", error: error.message });
+        }
+    }
+
+    // Delete Manager
+    static async deleteManager(req, res) {
+        try {
+            const { id } = req.params;
+            const user = await AdminManagerModel.findById(id).populate("roleId");
+
+            if (!user) {
+                return res.status(404).json({ message: "Manager not found" });
+            }
+
+            if (user.roleId.name !== "manager") {
+                return res.status(400).json({ message: "User is not a manager" });
+            }
+
+            await AdminManagerModel.findByIdAndDelete(id);
+            res.status(200).json({ message: "Manager deleted successfully" });
+        } catch (error) {
+            res.status(500).json({ message: "Error deleting manager", error: error.message });
+        }
+    }
+
 
 
 

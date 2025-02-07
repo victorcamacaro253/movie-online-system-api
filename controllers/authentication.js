@@ -5,6 +5,7 @@ import tokenService from '../services/tokenService.js';
 import loginHistory from './loginHistory.js';
 import handleError from '../utils/handleError.js';
 import refreshTokens from '../models/refresh_tokens.js';
+import otpUtils from '../utils/otpUtils.js';
 
 
 
@@ -36,6 +37,28 @@ class Authentication {
            if(!match){
             return res.status(401).json({ message: 'Invalid password' });
            }
+
+
+
+
+        // Check if 2FA is enabled for the user
+     /*   if (user.isTwoFactorEnabled) {
+            // Generate and send OTP
+            const { otp, secret, expiresAt } = await otpUtils.generateAndSendOtp(user.phoneNumber);
+
+            // Save the OTP details in the database
+            await userModel.findByIdAndUpdate(user._id, {
+                otp,
+                otpSecret: secret,
+                otpExpiresAt: expiresAt,
+            });
+
+            // Respond with a message indicating that an OTP has been sent
+            return res.status(200).json({
+                message: 'OTP sent successfully',
+                userId: user._id,
+            });
+        }*/
 
            const token =  tokenService.generateToken(user._id,user.email,'1h')
 
@@ -158,6 +181,66 @@ class Authentication {
                         })
                         } catch (error) {
                            handleError(res,error)
+                            }
+                        }
+
+
+
+                        static async verifyOtp(req, res) {
+                            const { userId, otp } = req.body;
+                            try {
+                                // Fetch the user from the database
+                                const user = await userModel.findById(userId);
+                                if (!user || !user.otp || !user.otpSecret || !user.otpExpiresAt) {
+                                    return res.status(400).json({ message: 'OTP not found or expired' });
+                                }
+                        
+                                // Verify the OTP
+                                const isValid = otpUtils.verifyOtp(otp, user.otpSecret, user.otpExpiresAt);
+                                if (!isValid) {
+                                    return res.status(400).json({ message: 'Invalid OTP' });
+                                }
+                        
+                                // Clear the OTP details from the database
+                                await userModel.findByIdAndUpdate(userId, {
+                                    otp: null,
+                                    otpSecret: null,
+                                    otpExpiresAt: null,
+                                });
+                        
+                                // Generate tokens
+                                const token = tokenService.generateToken(user._id, user.email, '1h');
+                                const refreshToken = tokenService.generateToken(user._id, user.email, '7d');
+                                const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // Expires in 7 days
+                        
+                                // Save the refresh token
+                                const saveRefreshToken = new refreshTokens({
+                                    user_id: user._id,
+                                    token: refreshToken,
+                                    expiresIn: expiresAt,
+                                });
+                                await saveRefreshToken.save();
+                        
+                                // Set the refresh token as a cookie
+                                res.cookie('refreshToken', refreshToken, {
+                                    httpOnly: false,
+                                    secure: process.env.NODE_ENV === 'production',
+                                    sameSite: 'Strict', // Protection against CSRF
+                                    maxAge: 24 * 60 * 60 * 1000, // 1 day
+                                });
+                        
+                                // Add login history record
+                                const randomCode = randomBytes(8).toString('hex');
+                                loginHistory.addUserLoginRecord(req, user._id, randomCode);
+                        
+                                // Respond with tokens
+                                res.status(200).json({
+                                    message: 'Login successful',
+                                    token: token,
+                                    refreshToken: refreshToken,
+                                });
+                            } catch (error) {
+                                handleError(res, error);
                             }
                         }
     
