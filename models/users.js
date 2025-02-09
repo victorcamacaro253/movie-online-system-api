@@ -10,6 +10,12 @@ const userSchema = new Schema({
         type:String,
 
     },
+    twitter_id:{
+        type:String,
+    },
+    github_id:{
+        type:String,
+    },
     username:{
         type:String,
         unique:true,
@@ -21,7 +27,7 @@ const userSchema = new Schema({
     },
     password:{
         type:String,
-        required:true
+       
     },
     phone:{
         type:String

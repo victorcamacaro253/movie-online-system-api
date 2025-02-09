@@ -11,6 +11,10 @@ import './jobs/scheduler.js'
 import cookieParser from "cookie-parser";
 import './controllers/socialMediaAuth.js';  // Asegúrate de que se configure passport
 import limiter from './middleware/rateLimiter.js';
+import session from 'express-session';
+import passport from 'passport';
+
+
 
 
 // Load environment variables
@@ -23,6 +27,19 @@ connectDB();
 const app = express();
 
 const server = http.createServer(app);
+
+
+// Configuración de la sesión
+app.use(session({
+  secret: 'victorcamacaro',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false }  // Cambia a true en producción con HTTPS
+}));
+
+// Inicializa passport y sesiones
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 setupWebSocket(server);
