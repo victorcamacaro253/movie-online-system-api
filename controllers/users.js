@@ -1,6 +1,7 @@
 import userModel from "../models/users.js"
 import { hash,compare } from "bcrypt"
 import AdminManagerModel from "../models/adminManager.js"
+import Roles from "../models/roles.js"
 
 class User {
 
@@ -8,6 +9,7 @@ class User {
         try {
 
             const users= await userModel.find()
+            .populate('role','-_id name')
 
             res.json(users)
             
@@ -25,6 +27,9 @@ class User {
             const {id} = req.params
 
             const user = await userModel.findById(id)
+            .populate('role','-_id name')
+
+            
             if(user.length===0){
                 res.status(404).json({message: "User not found"})
             }
@@ -43,6 +48,9 @@ class User {
         try {
             const {username} = req.params
             const user = await userModel.findOne({username})
+            .populate('role','-_id name')
+
+
             if(user.length===0){
                 res.status(404).json({message: "User not found"})
                 }
@@ -60,6 +68,8 @@ static async getUserByEmail(req,res){
   try{
 
     const user = await userModel.findOne({email})
+    .populate('role','-_id name')
+
     if(user.length===0){
         res.status(404).json({message: "User not found"})
         }
@@ -76,6 +86,8 @@ static async getUserByPersonalID(req,res){
 
     try{
         const user = await userModel.findOne({personalID})
+        .populate('role','-_id name')
+
         if(user.length===0){
             res.status(404).json({message: "User not found"})
             }
@@ -86,15 +98,46 @@ static async getUserByPersonalID(req,res){
             }
 }
 
- static async getAactiveUsers(req,res){
+ static async getActiveUsers(req,res){
     try{
-        const users = await userModel.find({status:'active'})
+        const users = await userModel.find({active:true})
+        .populate('role','-_id name')
+
+        console.log(users)
+
         res.json(users)
         }catch(error){
             console.log(error)
             res.status(500).json({message: "Error fetching users"})
             }
  }
+
+
+ static async getPaginatedUsers(req, res) {
+    try {
+        let { limit, skip } = req.query;
+
+        // Convert to numbers and set defaults
+        limit = parseInt(limit) || 10; // Default limit = 10
+        skip = parseInt(skip) || 0; // Default skip = 0
+
+        // Ensure values are not negative
+        if (limit < 1 || skip < 0) {
+            return res.status(400).json({ message: "Invalid pagination values" });
+        }
+
+        const users = await userModel.find()
+            .populate('role', '-_id name')
+            .skip(skip)
+            .limit(limit);
+
+        res.json(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching users" });
+    }
+}
+
 
  static async createUser(req,res){
     const {fullname,username,email,password,phone,personalID,cards,birthdate} = req.body
@@ -145,6 +188,8 @@ if (!passwordRegex.test(password)) {
 
         const hashedPassword = await hash(password, 10);
 
+        const role = await Roles.findOne({ name: "user" });
+        const roleId= role._id;
         const profile_image = req.file ? `/uploads/users/${req.file.filename}` : null;
         console.log(profile_image)
 
@@ -157,7 +202,8 @@ if (!passwordRegex.test(password)) {
             personalID,
             cards,
             profile_image,
-            birthdate
+            birthdate,
+            role: roleId
             })
 
             await user.save()
@@ -241,6 +287,8 @@ if (!passwordRegex.test(password)) {
             // Handle profile image (single file handling)
             const profile_image = req.file ? `/uploads/users/${req.file.filename}` : null;
 
+            const role = await Roles.findOne({ name: "user" });
+            const roleId= role._id;
             // Add valid user to the array
             usersToInsert.push({
                 fullname,
@@ -252,6 +300,7 @@ if (!passwordRegex.test(password)) {
                 profile_image,
                 cards,
                 birthdate,
+                role: roleId
             });
         }
 

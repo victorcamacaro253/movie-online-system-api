@@ -10,6 +10,7 @@ import authentication from "./authentication.js";
 import productionCompany from "./productionCompanies.js";
 import userPreferences from "./userPreferences.js";
 import userHistory from "./usersHistory.js";
+import loginHistory from "./loginHistory.js";
 import bookings from "./bookings.js";
 import tickePrices from "./ticketPrices.js";
 import rolesPermissions from "./rolesPermissions.js";
@@ -43,6 +44,7 @@ router.use('/userPreferences',userPreferences)
 
 router.use('/userHistory',userHistory)
 
+router.use('/loginHistory',loginHistory)
 
 router.use('/bookings',bookings)
 

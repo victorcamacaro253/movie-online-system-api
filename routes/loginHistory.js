@@ -1,10 +1,18 @@
 import { Router } from "express";
-import loginHistory from "../controllers/loginHistory";
+import loginHistory from "../controllers/loginHistory.js";
 
 
 const router = Router()
 
-router.get('/login',loginHistory.addUserLoginRecord)
+router.get('/',loginHistory.getAllLoginRecords)
+
+router.get('/user/:id',loginHistory.getUserLoginHistory)
+
+router.post('/login',loginHistory.addUserLoginRecord)
+
+router.delete('/:id', loginHistory.deleteLoginRecord);
+
+router.delete('/user/:userId', loginHistory.deleteUserLoginHistory);
 
 
 

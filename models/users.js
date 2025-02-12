@@ -37,9 +37,11 @@ const userSchema = new Schema({
         type:String
         }
     ,
-    status: {
-        type: String,
-        enum: ['active', 'inactive'],default:'active',
+    role: {
+        type: Schema.Types.ObjectId,ref:'roles',required:true
+    },
+    active: {
+        type:Boolean
     },
     cards:{
         debit :{
@@ -56,9 +58,7 @@ const userSchema = new Schema({
      birthdate: {
         type: Date
         },
-        google_id:{
-            type:String
-        },
+        
         roleId :{
             type: Schema.Types.ObjectId,
             ref: 'roles'

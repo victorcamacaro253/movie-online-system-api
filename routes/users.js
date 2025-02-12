@@ -5,17 +5,26 @@ import authenticationToken from "../middleware/authenticationToken.js";
 const router = Router()
 
 
-router.get('/',authenticationToken,User.getAllUsers)
+router.get('/',User.getAllUsers)
+
+
+router.get('/active',User.getActiveUsers)
+
+
+router.get('/pagination',User.getPaginatedUsers)
+
+
+router.get('/email',User.getUserByEmail)
+
 
 router.get('/:id',User.getUserById)
 
 router.get('/username/:username',User.getUserByUsername)
 
-router.get('/email',User.getUserByEmail)
 
 router.get('/ID',User.getUserByPersonalID)
 
-router.get('/active',User.getAactiveUsers)
+
 
 router.post('/',uploadUser.single('profile_image'),User.createUser)
 
