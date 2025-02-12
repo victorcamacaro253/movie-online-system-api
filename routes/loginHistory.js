@@ -6,7 +6,12 @@ const router = Router()
 
 router.get('/',loginHistory.getAllLoginRecords)
 
+router.get('/stats', loginHistory.getLoginStats);
+
+
 router.get('/user/:id',loginHistory.getUserLoginHistory)
+
+
 
 router.post('/login',loginHistory.addUserLoginRecord)
 

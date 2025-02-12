@@ -36,6 +36,32 @@ class loginHistory {
     }
 }
 
+static async getLoginStats(req, res) {
+    try {
+        const loginStats = await LoginHistory.aggregate([
+            { $group: { _id: "$user_id", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+            { 
+                $lookup: { 
+                    from: "users", 
+                    localField: "_id", 
+                    foreignField: "_id", 
+                    as: "user" 
+                } 
+            },
+            { $unwind: "$user" },
+            { $project: { _id: 1, count: 1, "user.username": 1, "user.email": 1 } }
+        ]);
+        
+        res.json(loginStats);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error fetching login statistics" });
+    }
+}
+
+
 
 
     static async addUserLoginRecord(req,userId,randomCode){
