@@ -14,6 +14,7 @@ import loginHistory from "./loginHistory.js";
 import bookings from "./bookings.js";
 import tickePrices from "./ticketPrices.js";
 import rolesPermissions from "./rolesPermissions.js";
+import payments from "./payments.js";
 import adminManager from "./adminManager.js";
 import csrf from "../middleware/csrfToken.js";
 
@@ -54,5 +55,6 @@ router.use('/roles',rolesPermissions)
 
 router.use('/management',adminManager)
 
+router.use('/payments',payments)
 
 export default router;
